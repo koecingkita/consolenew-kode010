@@ -4,7 +4,6 @@ import { render } from "solid-js/web";
 import "solid-devtools";
 
 import AppWrapper from "./AppWrapper";
-import App from "./App";
 
 const root = document.getElementById("root");
 

@@ -1,1 +1,40 @@
 @import 'tailwindcss';
+
+/* Tambahkan di file CSS global */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.sidebar-container {
+  animation-duration: 300ms;
+  animation-timing-function: ease-in-out;
+}
+
+.sidebar-container.mobile-open {
+  animation-name: slideIn;
+}
+
+.sidebar-container.mobile-closed {
+  animation-name: slideOut;
+}
+
+/* Pastikan konten utama tidak terganggu */
+@media (max-width: 767px) {
+  main {
+    margin-left: 0 !important;
+  }
+}
