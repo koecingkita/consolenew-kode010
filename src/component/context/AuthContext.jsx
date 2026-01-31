@@ -8,7 +8,8 @@ const apiGetToken = apiEndpoints.users.refresh;
 const apiLogout = apiEndpoints.users.logout;
 
 export function AuthProvider(props) {
-  const [role, setRole] = createSignal(1);
+  const [role, setRole] = createSignal('guest');
+  /*
   const [user, setUser] = createSignal('');
   const [accessToken, setAccessToken] = createSignal("");
   const [isLoading, setIsLoading] = createSignal(false);
@@ -89,9 +90,11 @@ export function AuthProvider(props) {
   //   api: [apiGetToken, apiLogout]
   // }
   //
+  //
+  // */
+  //
   const value = {
-    role: role(),
-    api: [apiGetToken, apiLogout]
+    role: "aaaaa"
   }
 
   return (

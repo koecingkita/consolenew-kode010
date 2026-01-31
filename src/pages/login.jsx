@@ -1,14 +1,8 @@
-
+import LoginComponent from "../component/Login";
 
 function Login() {
 
-
-  return (
-    <>
-      <h2>Login: nama</h2>
-      <p>Ini Login page</p>
-    </>
-  );
+  return <LoginComponent />
 }
 
 export default Login;

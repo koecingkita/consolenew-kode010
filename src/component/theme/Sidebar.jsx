@@ -1,43 +1,43 @@
 import { createSignal, For, Show, onMount, onCleanup } from 'solid-js';
 import { AiFillHome, AiFillFileText, AiOutlineFolderOpen, AiOutlineNumber, AiOutlineSetting } from 'solid-icons/ai'
-import { BsBoxArrowLeft, BsChevronLeft, BsChevronRight, BsList } from 'solid-icons/bs'
+import { BsBoxArrowLeft, BsChevronLeft, BsChevronRight } from 'solid-icons/bs'
+import { useSidebar } from '../context/SidebarContext';
+import { A } from '@solidjs/router'
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = createSignal(false);
-  const [isMobile, setIsMobile] = createSignal(false);
-  const [isMobileOpen, setIsMobileOpen] = createSignal(false);
+  const {
+    isMobileOpen,
+    isCollapsed,
+    isMobile,
+    toggleDesktopSidebar,
+    closeMobileSidebar,
+  } = useSidebar();
 
   const [menuItems, setMenuItems] = createSignal([
     { id: 1, name: 'Dashboard', icon: <AiFillHome />, path: '/', active: true },
     { id: 2, name: 'Artikel', icon: <AiFillFileText />, path: '/artikel' },
     { id: 3, name: 'Kategori', icon: <AiOutlineFolderOpen/>, path: '/kategori' },
     { id: 4, name: 'Tag', icon: <AiOutlineNumber />, path: '/tag' },
-    { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/settings' },
+    { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/setting' },
   ]);
 
-  // Check screen size
-  const checkMobile = () => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    if (!mobile) {
-      setIsMobileOpen(false); // Auto close on desktop
-    }
-  };
+  // console.log('Sidebar - isMobile:', isMobile(), 'isMobileOpen:', isMobileOpen(), 'isCollapsed:', isCollapsed());
 
   // Setup event listeners
   onMount(() => {
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    console.log('Sidebar mounted');
 
-    // Close sidebar when clicking outside (mobile only)
+
     const handleClickOutside = (e) => {
       if (isMobile() && isMobileOpen()) {
         const sidebar = document.querySelector('.sidebar-container');
-        const mobileToggle = document.querySelector('.mobile-hamburger');
+        const hamburgerButton = document.querySelector('.mobile-hamburger');
 
+        // Cek apakah klik bukan di sidebar DAN bukan di tombol hamburger
         if (sidebar && !sidebar.contains(e.target) &&
-            mobileToggle && !mobileToggle.contains(e.target)) {
-          setIsMobileOpen(false);
+            hamburgerButton && !hamburgerButton.contains(e.target)) {
+          // console.log('Click outside, closing sidebar');
+          closeMobileSidebar();
         }
       }
     };
@@ -45,7 +45,8 @@ const Sidebar = () => {
     // Close on escape key
     const handleEscape = (e) => {
       if (e.key === 'Escape' && isMobileOpen()) {
-        setIsMobileOpen(false);
+        console.log('Escape pressed, closing sidebar');
+        closeMobileSidebar();
       }
     };
 
@@ -53,19 +54,11 @@ const Sidebar = () => {
     document.addEventListener('keydown', handleEscape);
 
     onCleanup(() => {
-      window.removeEventListener('resize', checkMobile);
+      console.log('Sidebar cleanup');
       document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     });
   });
-
-  const toggleDesktopSidebar = () => {
-    setIsCollapsed(!isCollapsed());
-  };
-
-  const toggleMobileSidebar = () => {
-    setIsMobileOpen(!isMobileOpen());
-  };
 
   const setActiveItem = (id) => {
     setMenuItems(items =>
@@ -76,7 +69,8 @@ const Sidebar = () => {
     );
     // Close mobile sidebar after selecting item
     if (isMobile()) {
-      setIsMobileOpen(false);
+      // console.log('Item selected, closing mobile sidebar');
+      closeMobileSidebar();
     }
   };
 
@@ -86,23 +80,11 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Hamburger Button - Hanya muncul saat mobile DAN sidebar tertutup */}
-      <Show when={isMobile() && !isMobileOpen()}>
-        <button
-          onClick={toggleMobileSidebar}
-          class="mobile-hamburger fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-900 text-white shadow-lg md:hidden"
-          style="margin-top: 16px;" // Menurunkan sedikit agar tidak tepat di pojok
-          title="Toggle menu"
-        >
-          <BsList class="h-6 w-6" />
-        </button>
-      </Show>
-
       {/* Mobile Overlay Backdrop */}
       <Show when={isMobile() && isMobileOpen()}>
         <div
           class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={closeMobileSidebar}
         />
       </Show>
 
@@ -146,7 +128,7 @@ const Sidebar = () => {
             {/* Mobile Close Button */}
             <Show when={isMobile() && isMobileOpen()}>
               <button
-                onClick={() => setIsMobileOpen(false)}
+                onClick={closeMobileSidebar}
                 class="p-2 rounded-lg hover:bg-gray-700/50 transition-all duration-200 ml-auto"
                 title="Close menu"
               >
@@ -162,10 +144,9 @@ const Sidebar = () => {
             <For each={menuItems()}>
               {(item) => (
                 <li>
-                  <a
+                  <A
                     href={item.path}
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       setActiveItem(item.id);
                     }}
                     class={`
@@ -192,7 +173,7 @@ const Sidebar = () => {
                     <Show when={(isMobile() || (!isMobile() && !isCollapsed())) && item.active}>
                       <div class="ml-auto w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
                     </Show>
-                  </a>
+                  </A>
                 </li>
               )}
             </For>

@@ -1,12 +1,33 @@
+import { BsList } from 'solid-icons/bs'
+import { useSidebar } from '../context/SidebarContext';
+import { createEffect, onMount } from 'solid-js';
+
 function Navbar() {
+  const { isMobile, toggleMobileSidebar, isMobileOpen } = useSidebar();
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    console.log('Navbar handleToggle clicked');
+    toggleMobileSidebar();
+  }
+
+
   return (
     <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          {/* Padding kiri extra untuk hamburger button */}
-          <div class="md:pl-0 pl-14"> {/* 14 = 4 (default) + 10 (untuk hamburger) */}
-            <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-          </div>
+          {/* Mobile Hamburger Button */}
+          <Show when={isMobile()}>
+                      <button
+                        onClick={handleToggle}
+                        class="mobile-hamburger p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                        title="Toggle menu"
+                      >
+                        <BsList class="h-6 w-6" />
+                      </button>
+                    </Show>
+
+          <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
         </div>
 
         <div class="flex items-center space-x-4">

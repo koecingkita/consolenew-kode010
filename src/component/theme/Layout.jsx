@@ -1,24 +1,28 @@
+import { SidebarProvider } from "../context/SidebarContext";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import Content from "./Content";
+import { createEffect } from "solid-js";
 
 function Layout(props) {
+
+  createEffect(() => {
+    console.log("console logsss");
+  })
+
   return (
-    <div class='flex h-screen bg-gray-100'>
-      {/* Sidebar */}
-      <Sidebar />
+    <SidebarProvider>
+      <div class='flex h-screen bg-gray-100'>
+        <Sidebar />
 
-      <div class='flex-1 flex flex-col overflow-hidden w-full'>
-        {/* Navbar dengan padding kiri extra untuk hamburger button */}
-        <div class="relative">
+        <div class='flex-1 flex flex-col overflow-hidden w-full'>
           <Navbar />
+          <Content>
+            {props.children}
+          </Content>
         </div>
-
-        <Content>
-          {props.children}
-        </Content>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
 

@@ -1,5 +1,6 @@
+import { AuthProvider } from "./component/context/AuthContext";
 import App from "./App";
 
 export default function AppWrapper() {
-  return <App />
+  return <AuthProvider><App /></AuthProvider>
 }

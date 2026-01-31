@@ -1,4 +1,4 @@
-import { createContext, createSignal, useContext } from 'solid-js';
+import { createContext, createSignal, onMount, onCleanup, useContext } from 'solid-js';
 
 const SidebarContext = createContext();
 
@@ -7,37 +7,37 @@ export function SidebarProvider(props) {
   const [isCollapsed, setIsCollapsed] = createSignal(false);
   const [isMobile, setIsMobile] = createSignal(false);
 
-  // Function untuk toggle
-  const toggleMobileSidebar = () => {
-    setIsMobileOpen(!isMobileOpen());
-  };
+  // Cek mobile di provider
+  onMount(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      console.log('checkMobile:', mobile);
+      setIsMobile(mobile);
+    };
 
-  const toggleDesktopSidebar = () => {
-    setIsCollapsed(!isCollapsed());
-  };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
 
-  const closeMobileSidebar = () => {
-    setIsMobileOpen(false);
-  };
+    onCleanup(() => {
+      window.removeEventListener('resize', checkMobile);
+    });
+  });
 
-  const checkMobile = () => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    if (!mobile) {
-      setIsMobileOpen(false);
-    }
-  };
-
-  // Value yang akan di-share
   const value = {
-    isMobileOpen,
-    isCollapsed,
-    isMobile,
-    setIsMobile,
-    toggleMobileSidebar,
-    toggleDesktopSidebar,
-    closeMobileSidebar,
-    checkMobile,
+    // Getters
+    isMobileOpen: () => isMobileOpen(),
+    isCollapsed: () => isCollapsed(),
+    isMobile: () => isMobile(),
+
+    // Setters
+    setIsMobileOpen,
+    setIsCollapsed,
+
+    // Actions
+    toggleMobileSidebar: () => { setIsMobileOpen(prev =>!prev) },
+      // console.log('toggleMobileSidebar from', isMobileOpen(), 'to', !isMobileOpen());
+    toggleDesktopSidebar: () => setIsCollapsed(!isCollapsed()),
+    closeMobileSidebar: () => setIsMobileOpen(false),
   };
 
   return (
@@ -48,9 +48,5 @@ export function SidebarProvider(props) {
 }
 
 export function useSidebar() {
-  const context = useContext(SidebarContext);
-  if (!context) {
-    throw new Error('useSidebar must be used within SidebarProvider');
-  }
-  return context;
+  return useContext(SidebarContext);
 }

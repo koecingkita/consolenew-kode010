@@ -1,5 +1,8 @@
+import ArtikelContent from "../component/Artikel"
+import Container from "../component/theme/ui/ContainerContent"
+
 function Artikel() {
-  return <p>Artikel...</p>
+  return <Container><ArtikelContent /></Container>
 }
 
 export default Artikel;
