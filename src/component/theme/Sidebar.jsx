@@ -1,5 +1,5 @@
 import { createSignal, For, Show, onMount, onCleanup } from 'solid-js';
-import { AiFillHome, AiFillFileText, AiOutlineFolderOpen, AiOutlineNumber, AiOutlineSetting } from 'solid-icons/ai'
+import { AiFillHome, AiFillFileText, AiOutlineFolderOpen, AiOutlineNumber, AiOutlineSetting, AiOutlineQuestionCircle  } from 'solid-icons/ai'
 import { BsBoxArrowLeft, BsChevronLeft, BsChevronRight } from 'solid-icons/bs'
 import { useSidebar } from '../context/SidebarContext';
 import { A } from '@solidjs/router'
@@ -18,6 +18,7 @@ const Sidebar = () => {
     { id: 2, name: 'Artikel', icon: <AiFillFileText />, path: '/artikel' },
     { id: 3, name: 'Kategori', icon: <AiOutlineFolderOpen/>, path: '/kategori' },
     { id: 4, name: 'Tag', icon: <AiOutlineNumber />, path: '/tag' },
+    { id: 5, name: 'FAQ', icon: <AiOutlineQuestionCircle />, path: '/faq' },
     { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/setting' },
   ]);
 
