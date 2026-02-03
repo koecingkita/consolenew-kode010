@@ -4,12 +4,16 @@ import { BsBoxArrowLeft, BsChevronLeft, BsChevronRight } from 'solid-icons/bs'
 import { useSidebar } from '../context/SidebarContext';
 import { A } from '@solidjs/router'
 import { useLocation } from '@solidjs/router'
+import { useAuth } from '../context/AuthContext';
+import { TbOutlineListTree } from 'solid-icons/tb'
+import { BsListNested } from 'solid-icons/bs'
 
 const Sidebar = () => {
   const location = useLocation();
+  const { AppName } = useAuth();
 
   createEffect(() => {
-    console.log("query aaa:", location.pathname.split("/")[1]); // cara ambil active nya gimana? untuk childnya
+    console.log("query aaa:", location.pathname.split("/")[1]);
   })
 
   // kondisi saat ini active berdasarkan item.id, jika di id itu ada child, contoh , /artikel/create ? itu gimana supaya bisa active di artikel
@@ -25,7 +29,7 @@ const Sidebar = () => {
   const [menuItems, setMenuItems] = createSignal([
     { id: 1, name: 'Dashboard', icon: <AiFillHome />, path: '/' },
     { id: 2, name: 'Artikel', icon: <AiFillFileText />, path: '/artikel' },
-    { id: 3, name: 'Kategori', icon: <AiOutlineFolderOpen/>, path: '/kategori' },
+    { id: 3, name: 'Kategori', icon: <BsListNested/>, path: '/kategori' },
     { id: 4, name: 'Tag', icon: <AiOutlineNumber />, path: '/tag' },
     { id: 5, name: 'FAQ', icon: <AiOutlineQuestionCircle />, path: '/faq' },
     { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/setting' },
@@ -121,7 +125,7 @@ const Sidebar = () => {
                     <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
                   </svg>
                 </div>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">SolidApp</h1>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">{AppName}</h1>
               </div>
             </Show>
 

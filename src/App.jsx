@@ -20,6 +20,7 @@ const UpdateFAQ = lazy(() => import("./component/UpdateFAQ"));
 const CreateTag = lazy(() => import("./component/CreateTag"));
 const UpdateTag = lazy(() => import("./component/UpdateTag"));
 const TextRich = lazy(() => import("./component/TextRich"));
+const NotFound = lazy(() => import("./pages/notfound"));
 
 
 const App = () => {
@@ -61,8 +62,8 @@ const App = () => {
         { path: '/update', component:UpdateFAQ }
       ]},
       { path: '/test', component: TextRich },
-      { path: '*', component: () => <p>Not Found</p> }
     ]},
+    { path: '*', component: NotFound }
   ];
 
   const currentRoute = isAuthenticated === 'admin' ? routesPrivate : routesPublic;

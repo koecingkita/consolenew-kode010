@@ -12,7 +12,6 @@ function CreateArtikel(props) {
   })
 
   return (<Container>
-    <p>Create Artikel</p>
 
     <div class='flex flex-col rounded-xl w-full max-w-6xl mx-auto'>
       <div class="flex flex-col gap-6 mx-6">

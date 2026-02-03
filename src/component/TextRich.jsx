@@ -2,7 +2,6 @@ import { createSignal } from 'solid-js';
 import { AiOutlineAlignCenter, AiOutlineAlignLeft, AiOutlineAlignRight } from 'solid-icons/ai'
 
 
-
 function TextRich() {
   const [content, setContent] = createSignal('');
   const [showImageModal, setShowImageModal] = createSignal(false);

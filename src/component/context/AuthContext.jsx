@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 const apiGetToken = apiEndpoints.users.refresh;
 const apiLogout = apiEndpoints.users.logout;
+const AppName = import.meta.env.VITE_APP_NAME;
 
 export function AuthProvider(props) {
   const [role, setRole] = createSignal('guest');
@@ -94,7 +95,8 @@ export function AuthProvider(props) {
   // */
   //
   const value = {
-    role: "aaaaa"
+    role: "aaaaa",
+    AppName
   }
 
   return (
