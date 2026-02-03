@@ -1,3 +1,9 @@
+import { AiOutlineSearch } from 'solid-icons/ai';
+import { FaSolidAdd, FaSolidDownload } from 'solid-icons/fa'
+import { BsSortDownAlt } from 'solid-icons/bs'
+import { BiRegularFilterAlt } from 'solid-icons/bi'
+import Breadcrumbs from './theme/ui/Breadcrumb';
+
 function Artikel() {
   const recentOrders = [
     { id: '#ORD-001', customer: 'John Smith', date: 'Today, 10:30 AM', amount: '$245.99', status: 'Completed' },
@@ -7,8 +13,120 @@ function Artikel() {
   ];
 
   return (<>
-    <div class="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6  text-white">
+    <Breadcrumbs />
+    <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm  bg-white">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+        {/* ===== Left: Title & Info ===== */}
+        <div>
+          <h1 class="text-xl font-semibold">Dashboard Artikel</h1>
+          <p class="text-sm">
+            Kelola artikel, draft, dan publikasi
+          </p>
+        </div>
+
+        {/* ===== Right: Actions ===== */}
+        <div class="flex flex-wrap items-center gap-2">
+
+          {/* Create Artikel */}
+          <button
+            class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+          >
+            <FaSolidDownload class="h-4 w-4" />
+            Download CSV
+          </button>
+          <button
+            class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+          >
+            <FaSolidAdd class="h-4 w-4" />
+            Buat Artikel
+          </button>
+
+
+        </div>
+      </div>
+
+      {/* */}
+      {/* */}
+      {/* */}
+
+      <div class="w-full my-4">
+        {/* Tabs header */}
+        <div class="flex border-b border-gray-200">
+          <button
+            class="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600"
+          >
+            Artikel
+          </button>
+
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            Produk
+          </button>
+
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            Layanan
+          </button>
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            FAQ
+          </button>
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            Info
+          </button>
+        </div>
+      </div>
+
+
+
+
+      {/* */}
+      {/* */}
+      {/* */}
+
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+        {/* ===== Left: Title & Info ===== */}
+        <div>
+          {/* Search */}
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="Cari artikel..."
+              class="w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400">
+              <AiOutlineSearch />
+            </span>
+          </div>
+        </div>
+
+        {/* ===== Right: Actions ===== */}
+        <div class="flex flex-wrap items-center gap-2">
+          {/* Create Artikel */}
+          <button
+            class="flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+          >
+            <BiRegularFilterAlt /> Filter
+          </button>
+
+          {/* Create Artikel */}
+          <button
+            class="flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+          >
+            <BsSortDownAlt /> Sort
+          </button>
+
+        </div>
+      </div>
     </div>
+
 
     <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">

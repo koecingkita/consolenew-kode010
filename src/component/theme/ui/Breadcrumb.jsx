@@ -1,4 +1,4 @@
-function CreateFAQ() {
+function Breadcrumbs() {
   return (<>
     <nav class="flex" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
@@ -26,4 +26,4 @@ function CreateFAQ() {
   </>);
 }
 
-export default CreateFAQ;
+export default Breadcrumbs;

@@ -1,8 +1,10 @@
 import { createSignal } from 'solid-js';
+import { AiOutlineAlignCenter, AiOutlineAlignLeft, AiOutlineAlignRight } from 'solid-icons/ai'
+
+
 
 function TextRich() {
   const [content, setContent] = createSignal('');
-  const [selectedText, setSelectedText] = createSignal('');
   const [showImageModal, setShowImageModal] = createSignal(false);
   const [imageUrl, setImageUrl] = createSignal('');
   const [imageSize, setImageSize] = createSignal('100');
@@ -163,12 +165,41 @@ function TextRich() {
     }
   };
 
+  // PERBAIKAN 1: Function untuk set text color yang lebih reliable
   const setTextColor = (color) => {
-    editorRef.focus();
-    document.execCommand('styleWithCSS', false, true);
-    document.execCommand('foreColor', false, color);
-    document.execCommand('styleWithCSS', false, false);
-    setContent(editorRef.innerHTML);
+    const selection = window.getSelection();
+
+    // Simpan selection dulu
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+
+      // Jika ada text yang diselect
+      if (!range.collapsed) {
+        // Buat span dengan warna
+        const span = document.createElement('span');
+        span.style.color = color;
+
+        // Extract selected content
+        const selectedContent = range.extractContents();
+        span.appendChild(selectedContent);
+
+        // Insert span
+        range.insertNode(span);
+
+        // Select the newly inserted content
+        range.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else {
+        // Jika cursor tanpa selection, set untuk typing selanjutnya
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('foreColor', false, color);
+        document.execCommand('styleWithCSS', false, false);
+      }
+
+      setContent(editorRef.innerHTML);
+      editorRef.focus();
+    }
   };
 
   // Fungsi list yang diperbaiki menggunakan execCommand
@@ -195,8 +226,48 @@ function TextRich() {
 
   return (
     <div class="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg">
-      {/* Tambahkan style untuk list agar terlihat */}
+      {/* PERBAIKAN 2: Tambahkan style untuk ukuran heading default */}
       <style>{`
+        [contenteditable] h1 {
+          font-size: 2em;
+          font-weight: bold;
+          margin: 0.67em 0;
+        }
+
+        [contenteditable] h2 {
+          font-size: 1.5em;
+          font-weight: bold;
+          margin: 0.75em 0;
+        }
+
+        [contenteditable] h3 {
+          font-size: 1.17em;
+          font-weight: bold;
+          margin: 0.83em 0;
+        }
+
+        [contenteditable] h4 {
+          font-size: 1em;
+          font-weight: bold;
+          margin: 1.12em 0;
+        }
+
+        [contenteditable] h5 {
+          font-size: 0.83em;
+          font-weight: bold;
+          margin: 1.5em 0;
+        }
+
+        [contenteditable] h6 {
+          font-size: 0.67em;
+          font-weight: bold;
+          margin: 1.67em 0;
+        }
+
+        [contenteditable] p {
+          margin: 1em 0;
+        }
+
         [contenteditable] ul {
           list-style-type: disc;
           padding-left: 40px;
@@ -226,55 +297,55 @@ function TextRich() {
       `}</style>
 
       {/* Toolbar */}
-      <div class="border border-gray-300 rounded-t-lg p-3 bg-gray-50 flex flex-wrap gap-2">
+      <div className="border border-gray-300 rounded-t-lg p-3 bg-gray-50 flex flex-wrap gap-2">
 
         {/* Heading Styles */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={() => formatBlock('h1')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-bold"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-bold"
             title="Heading 1"
           >
             H1
           </button>
           <button
             onClick={() => formatBlock('h2')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-bold"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-bold"
             title="Heading 2"
           >
             H2
           </button>
           <button
             onClick={() => formatBlock('h3')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-semibold"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-semibold"
             title="Heading 3"
           >
             H3
           </button>
           <button
             onClick={() => formatBlock('h4')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-semibold"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm font-semibold"
             title="Heading 4"
           >
             H4
           </button>
           <button
             onClick={() => formatBlock('h5')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Heading 5"
           >
             H5
           </button>
           <button
             onClick={() => formatBlock('h6')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Heading 6"
           >
             H6
           </button>
           <button
             onClick={() => formatBlock('p')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Paragraph"
           >
             P
@@ -282,24 +353,24 @@ function TextRich() {
         </div>
 
         {/* Text Formatting */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={() => execCommand('bold')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 font-bold"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 font-bold"
             title="Bold"
           >
             B
           </button>
           <button
             onClick={() => execCommand('italic')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 italic"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 italic"
             title="Italic"
           >
             I
           </button>
           <button
             onClick={() => execCommand('underline')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 underline"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 underline"
             title="Underline"
           >
             U
@@ -307,42 +378,42 @@ function TextRich() {
         </div>
 
         {/* Alignment */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={() => setAlignment('left')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100"
             title="Align Left"
           >
-            ⬅
+            <AiOutlineAlignLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => setAlignment('center')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100"
             title="Align Center"
           >
-            ↔
+            <AiOutlineAlignCenter className="w-4 h-4" />
           </button>
           <button
             onClick={() => setAlignment('right')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100"
             title="Align Right"
           >
-            ➡
+            <AiOutlineAlignRight className="w-4 h-4" />
           </button>
         </div>
 
         {/* Lists */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={() => toggleList('ul')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Bullet List"
           >
             • List
           </button>
           <button
             onClick={() => toggleList('ol')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Numbered List"
           >
             1. List
@@ -350,10 +421,10 @@ function TextRich() {
         </div>
 
         {/* Quote */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={() => formatBlock('blockquote')}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Quote"
           >
             " Quote
@@ -361,10 +432,10 @@ function TextRich() {
         </div>
 
         {/* Image */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <button
             onClick={openImageModal}
-            class="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm"
             title="Insert Image"
           >
             🖼 Image
@@ -372,22 +443,30 @@ function TextRich() {
         </div>
 
         {/* Text Color */}
-        <div class="flex gap-1 border-r pr-2">
-          <label class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 cursor-pointer">
-            <span class="text-sm">Color</span>
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
+          <label
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
+            onMouseDown={(e) => {
+              saveCursorPosition();
+            }}
+          >
+            <span className="text-sm">Color</span>
             <input
               type="color"
-              onChange={(e) => setTextColor(e.target.value)}
-              class="w-6 h-6 cursor-pointer"
+              onChange={(e) => {
+                restoreCursorPosition();
+                setTextColor(e.target.value);
+              }}
+              className="w-5 h-5 cursor-pointer"
             />
           </label>
         </div>
 
         {/* Font Size */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <select
             onChange={(e) => execCommand('fontSize', e.target.value)}
-            class="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm cursor-pointer"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm cursor-pointer w-28"
           >
             <option value="">Size</option>
             <option value="1">Kecil</option>
@@ -398,10 +477,10 @@ function TextRich() {
         </div>
 
         {/* Font Family */}
-        <div class="flex gap-1 border-r pr-2">
+        <div className="flex gap-1 border-r border-gray-300 pr-2">
           <select
             onChange={(e) => execCommand('fontName', e.target.value)}
-            class="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm cursor-pointer"
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-100 text-sm cursor-pointer w-32"
           >
             <option value="">Font</option>
             <option value="Arial">Arial</option>
@@ -414,13 +493,13 @@ function TextRich() {
         </div>
 
         {/* Reset Button */}
-        <div class="flex gap-1">
+        <div className="flex gap-1">
           <button
             onClick={resetEditor}
-            class="px-3 py-1 bg-red-500 text-white border border-red-600 rounded hover:bg-red-600"
+            className="px-3 py-1.5 bg-red-500 text-white border border-red-600 rounded hover:bg-red-600 text-sm"
             title="Reset / Clear All"
           >
-            🗑 Reset
+            Reset
           </button>
         </div>
       </div>
@@ -429,7 +508,7 @@ function TextRich() {
       <div
         ref={editorRef}
         contentEditable
-        class="min-h-[400px] p-4 border border-t-0 border-gray-300 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="min-h-[400px] p-4 border border-t-0 border-gray-300 rounded-b-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
         onInput={(e) => setContent(e.currentTarget.innerHTML)}
         innerHTML="<p>Mulai menulis di sini...</p>"
         style={{
@@ -440,7 +519,7 @@ function TextRich() {
 
       {/* Image Modal */}
       {showImageModal() && (
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
           <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
             <h3 class="text-lg font-bold mb-4">Insert Image</h3>
 
@@ -480,24 +559,24 @@ function TextRich() {
             {/* Image Alignment */}
             <div class="mb-4">
               <label class="block text-sm font-medium mb-2">Alignment</label>
-              <div class="flex gap-2">
+              <div class="flex gap-2 w-1/2">
                 <button
                   onClick={() => setImageAlign('left')}
-                  class={`flex-1 px-3 py-2 border rounded ${imageAlign() === 'left' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
+                  class={`flex justify-center px-3 py-2 border rounded ${imageAlign() === 'left' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
                 >
-                  ⬅ Left
+                  <AiOutlineAlignLeft />
                 </button>
                 <button
                   onClick={() => setImageAlign('center')}
-                  class={`flex-1 px-3 py-2 border rounded ${imageAlign() === 'center' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
+                  class={`flex justify-center px-3 py-2 border rounded ${imageAlign() === 'center' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
                 >
-                  ↔ Center
+                  <AiOutlineAlignCenter />
                 </button>
                 <button
                   onClick={() => setImageAlign('right')}
-                  class={`flex-1 px-3 py-2 border rounded ${imageAlign() === 'right' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
+                  class={`flex justify-center px-3 py-2 border rounded ${imageAlign() === 'right' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'}`}
                 >
-                  ➡ Right
+                  <AiOutlineAlignRight />
                 </button>
               </div>
             </div>

@@ -1,10 +1,19 @@
-import { createSignal, For, Show, onMount, onCleanup } from 'solid-js';
+import { createSignal, For, Show, onMount, onCleanup, createEffect } from 'solid-js';
 import { AiFillHome, AiFillFileText, AiOutlineFolderOpen, AiOutlineNumber, AiOutlineSetting, AiOutlineQuestionCircle  } from 'solid-icons/ai'
 import { BsBoxArrowLeft, BsChevronLeft, BsChevronRight } from 'solid-icons/bs'
 import { useSidebar } from '../context/SidebarContext';
 import { A } from '@solidjs/router'
+import { useLocation } from '@solidjs/router'
 
 const Sidebar = () => {
+  const location = useLocation();
+
+  createEffect(() => {
+    console.log("query aaa:", location.pathname.split("/")[1]); // cara ambil active nya gimana? untuk childnya
+  })
+
+  // kondisi saat ini active berdasarkan item.id, jika di id itu ada child, contoh , /artikel/create ? itu gimana supaya bisa active di artikel
+  //
   const {
     isMobileOpen,
     isCollapsed,
@@ -14,7 +23,7 @@ const Sidebar = () => {
   } = useSidebar();
 
   const [menuItems, setMenuItems] = createSignal([
-    { id: 1, name: 'Dashboard', icon: <AiFillHome />, path: '/', active: true },
+    { id: 1, name: 'Dashboard', icon: <AiFillHome />, path: '/' },
     { id: 2, name: 'Artikel', icon: <AiFillFileText />, path: '/artikel' },
     { id: 3, name: 'Kategori', icon: <AiOutlineFolderOpen/>, path: '/kategori' },
     { id: 4, name: 'Tag', icon: <AiOutlineNumber />, path: '/tag' },
@@ -22,9 +31,12 @@ const Sidebar = () => {
     { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/setting' },
   ]);
 
-  // console.log('Sidebar - isMobile:', isMobile(), 'isMobileOpen:', isMobileOpen(), 'isCollapsed:', isCollapsed());
 
-  // Setup event listeners
+  const isActive = (path) => {
+    if(path === "/") return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  }
+
   onMount(() => {
     console.log('Sidebar mounted');
 
@@ -65,7 +77,7 @@ const Sidebar = () => {
     setMenuItems(items =>
       items.map(item => ({
         ...item,
-        active: item.id === id
+        active: item.path === id
       }))
     );
     // Close mobile sidebar after selecting item
@@ -147,12 +159,9 @@ const Sidebar = () => {
                 <li>
                   <A
                     href={item.path}
-                    onClick={() => {
-                      setActiveItem(item.id);
-                    }}
                     class={`
                       group flex items-center px-4 py-3 rounded-lg transition-all duration-200
-                      ${item.active
+                      ${isActive(item.path)
                         ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 border-l-4 border-blue-500 shadow-md'
                         : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:translate-x-1'
                       }
