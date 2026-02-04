@@ -41,7 +41,7 @@ export default function TagInput() {
   };
 
   return (
-    <div class="relative w-full max-w-md">
+    <div class="relative w-full">
       {/* Input wrapper */}
       <div
         class={`flex flex-wrap items-center gap-2 rounded-md border p-2 ${

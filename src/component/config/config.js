@@ -40,4 +40,6 @@ export const apiEndpoints = {
     publish: urlApi + "/panduan/publish",
     unpublish: urlApi + "/panduan/unpublish",
   },
+  kategori: {}, // get, create, delete, update
+  faq: {}, // get, create, delete, update
 };

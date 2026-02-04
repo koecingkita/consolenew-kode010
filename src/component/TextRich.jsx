@@ -2,6 +2,7 @@ import { createSignal } from 'solid-js';
 import { AiOutlineAlignCenter, AiOutlineAlignLeft, AiOutlineAlignRight } from 'solid-icons/ai'
 
 
+
 function TextRich() {
   const [content, setContent] = createSignal('');
   const [showImageModal, setShowImageModal] = createSignal(false);
@@ -224,7 +225,7 @@ function TextRich() {
   };
 
   return (
-    <div class="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg">
+    <div class="w-full max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-md">
       {/* PERBAIKAN 2: Tambahkan style untuk ukuran heading default */}
       <style>{`
         [contenteditable] h1 {

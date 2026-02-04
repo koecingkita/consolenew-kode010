@@ -7,12 +7,20 @@ function Kategori() {
   ];
 
   return (<>
-    <div class="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6  text-white">
+    <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-xl font-semibold">Kategori Artikel Produk</h1>
+          <p class="text-sm text-gray-600">
+            Atur kategori khusus untuk artikel yang berisi informasi produk
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+        <h3 class="text-lg font-semibold text-gray-800">Kategori Orders</h3>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full">

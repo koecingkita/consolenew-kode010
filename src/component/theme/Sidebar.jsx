@@ -29,7 +29,7 @@ const Sidebar = () => {
   const [menuItems, setMenuItems] = createSignal([
     { id: 1, name: 'Dashboard', icon: <AiFillHome />, path: '/' },
     { id: 2, name: 'Artikel', icon: <AiFillFileText />, path: '/artikel' },
-    { id: 3, name: 'Kategori', icon: <BsListNested/>, path: '/kategori' },
+    { id: 3, name: 'Kategori Produk', icon: <BsListNested/>, path: '/kategori' },
     { id: 4, name: 'Tag', icon: <AiOutlineNumber />, path: '/tag' },
     { id: 5, name: 'FAQ', icon: <AiOutlineQuestionCircle />, path: '/faq' },
     { id: 6, name: 'Settings', icon: <AiOutlineSetting />, path: '/setting' },

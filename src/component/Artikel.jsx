@@ -14,43 +14,11 @@ function Artikel() {
 
   console.log('list artikel: ', listArtikel);
 
-  const recentOrders = [
-    {
-      id: "#ORD-001",
-      customer: "John Smith",
-      date: "Today, 10:30 AM",
-      amount: "$245.99",
-      status: "Completed",
-    },
-    {
-      id: "#ORD-002",
-      customer: "Sarah Johnson",
-      date: "Today, 09:15 AM",
-      amount: "$89.50",
-      status: "Processing",
-    },
-    {
-      id: "#ORD-003",
-      customer: "Mike Brown",
-      date: "Yesterday, 3:45 PM",
-      amount: "$156.75",
-      status: "Completed",
-    },
-    {
-      id: "#ORD-004",
-      customer: "Emma Wilson",
-      date: "Yesterday, 11:20 AM",
-      amount: "$299.99",
-      status: "Pending",
-    },
-  ];
 
   const dataTab = [
     { id: 0, label: "Artikel" },
     { id: 1, label: "Produk" },
-    { id: 2, label: "Layanan" },
-    { id: 3, label: "FAQ" },
-    { id: 4, label: "Info" },
+    { id: 2, label: "Panduan" },
   ]
 
   const filterTab = () =>
@@ -59,7 +27,7 @@ function Artikel() {
 
   return (
     <>
-      <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm  bg-white">
+      <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* ===== Left: Title & Info ===== */}
           <div>
