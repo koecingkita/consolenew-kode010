@@ -42,7 +42,7 @@ const App = () => {
       { path: '/artikel', children: [
         { path: '/', component: Artikel },
         { path: '/create', component: CreateArtikel },
-        { path: '/update', component: UpdateArtikel },
+        { path: '/update/:uuid', component: UpdateArtikel },
       ]},
       { path: '/Dashboard', component: Dashboard},
       { path: '/kategori', children: [
