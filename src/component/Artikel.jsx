@@ -9,144 +9,146 @@ import { RiSystemDeleteBinLine } from 'solid-icons/ri'
 import { BsInfoLg } from 'solid-icons/bs'
 import { A } from '@solidjs/router';
 import Tooltip from "./theme/ui/Tooltip.jsx";
-import Detele from "./modals/Delete.jsx";
+import Delete from './modals/Delete.jsx'
+import Info from './modals/Info.jsx'
 
-const headArtikel = [
-  {
-    key: "id", label: "ID", render: (item) => (
-      <td class="whitespace-nowrap text-sm font-medium text-blue-600">
-        {item.id}
-      </td>
-  )},
-  { key: "title", label: "Title" },
-  { key: "slug", label: "Slug" },
-  {
-    key: "status",
-    label: "Status",
-    render: (item) => (
-      <span
-        class={`px-3 py-1 text-xs rounded-full ${
-          item.status === "1"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-      </span>
-    ),
-  },
-  {
-    key: "action",
-    label: "Action",
-    render: (item) => (
-      <div class="flex gap-2 text-md">
-        <Tooltip text='Edit Artikel' position='bottom'>
-          <A href={`update/${item.slug}`}>
-            <FaRegularEdit class="text-blue-700 cursor-pointer" />
-          </A>
-        </Tooltip>
-
-        <Tooltip text='Delete Artikel' position='bottom'>
-          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => toggleModals(item)}/>
-        </Tooltip>
-
-        <Tooltip text='Detail Artikel' position='bottom'>
-          <BsInfoLg class="cursor-pointer" />
-        </Tooltip>
-      </div>
-    ),
-  },
-];
-
-const headPanduan = [
-  {
-    key: "id", label: "ID", render: (item) => (
-      <td class="whitespace-nowrap text-sm font-medium text-blue-600">
-        {item.id}
-      </td>
-  )},
-  { key: "title", label: "Title" },
-  { key: "slug", label: "Slug" },
-  {
-    key: "status",
-    label: "Status",
-    render: (item) => (
-      <span
-        class={`px-3 py-1 text-xs rounded-full ${
-          item.status === "1"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-      </span>
-    ),
-  },
-  {
-    key: "action",
-    label: "Action",
-    render: () => (
-      <div class="flex gap-2 text-md">
-        <FaRegularEdit class="text-blue-700 cursor-pointer" />
-        <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
-        <BsInfoLg class="cursor-pointer" />
-      </div>
-    ),
-  },
-];
-
-const headArtikelProduk = [
-  {
-    key: "id", label: "ID", render: (item) => (
-      <td class="whitespace-nowrap text-sm font-medium text-blue-600">
-        {item.id}
-      </td>
-  )},
-  { key: "title", label: "Title" },
-  { key: "slug", label: "Slug" },
-  { key: "kategori", label: "Kategori" },
-  {
-    key: "status",
-    label: "Status",
-    render: (item) => (
-      <span
-        class={`px-3 py-1 text-xs rounded-full ${
-          item.status === "1"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-      </span>
-    ),
-  },
-  {
-    key: "action",
-    label: "Action",
-    render: () => (
-      <div class="flex gap-2 text-md">
-        <FaRegularEdit class="text-blue-700 cursor-pointer" />
-        <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
-        <BsInfoLg class="cursor-pointer" />
-      </div>
-    ),
-  },
-];
+const initialModals = { type:null, item: null, open:false }
 
 
 function Artikel() {
   const [tab, setTab] = createSignal(0);
-  const [modals, setModals] = createSignal(false);
-  const [selectItem, setSelectedItem] = createSignal(null);
+  const [modals, setModals] = createSignal(initialModals);
 
-  const toggleModals = (item) => {
-    if (modals) {
-      setSelectedItem(null);
-      setModals((prev) => !prev);
-    }
-    setSelectedItem(item);
-    setModals((prev) => !prev);
+  const openModal = (type, item=null) => {
+    setModals({ type, item, open:true });
   };
+
+  const closeModal = () => {
+    setModals(initialModals)
+  }
+
+
+  const headArtikel = [
+    {
+      key: "id", label: "ID", render: (item) => (
+        <td class="whitespace-nowrap text-sm font-medium text-blue-600">
+          {item.id}
+        </td>
+    )},
+    { key: "title", label: "Title" },
+    { key: "slug", label: "Slug" },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => (
+        <span
+          class={`px-3 py-1 text-xs rounded-full ${
+            item.status === "1"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      render: (item) => (
+        <div class="flex gap-2 text-md">
+          <Tooltip text='Edit Artikel' position='bottom'>
+            <A href={`update/${item.slug}`}>
+              <FaRegularEdit class="text-blue-700 cursor-pointer" />
+            </A>
+          </Tooltip>
+
+          <Tooltip text='Delete Artikel' position='bottom'>
+            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+          </Tooltip>
+
+          <Tooltip text='Detail Artikel' position='bottom'>
+            <BsInfoLg class="cursor-pointer" onClick={() => openModal('info', item)}/>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
+
+  const headPanduan = [
+    {
+      key: "id", label: "ID", render: (item) => (
+        <td class="whitespace-nowrap text-sm font-medium text-blue-600">
+          {item.id}
+        </td>
+    )},
+    { key: "title", label: "Title" },
+    { key: "slug", label: "Slug" },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => (
+        <span
+          class={`px-3 py-1 text-xs rounded-full ${
+            item.status === "1"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      render: () => (
+        <div class="flex gap-2 text-md">
+          <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
+          <BsInfoLg class="cursor-pointer" />
+        </div>
+      ),
+    },
+  ];
+
+  const headArtikelProduk = [
+    {
+      key: "id", label: "ID", render: (item) => (
+        <td class="whitespace-nowrap text-sm font-medium text-blue-600">
+          {item.id}
+        </td>
+    )},
+    { key: "title", label: "Title" },
+    { key: "slug", label: "Slug" },
+    { key: "kategori", label: "Kategori" },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => (
+        <span
+          class={`px-3 py-1 text-xs rounded-full ${
+            item.status === "1"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      render: () => (
+        <div class="flex gap-2 text-md">
+          <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
+          <BsInfoLg class="cursor-pointer" />
+        </div>
+      ),
+    },
+  ];
 
   const dataTab = [
     { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: listArtikel },
@@ -156,7 +158,7 @@ function Artikel() {
 
   return (
     <>
-      <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
+      <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200 bg-white">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 class="text-xl font-semibold">Dashboard Artikel</h1>
@@ -164,11 +166,11 @@ function Artikel() {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <button class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition">
+            <button class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 hover:cursor-pointer transition">
               <FaSolidDownload class="h-4 w-4" />
               Download CSV
             </button>
-            <A href='create' class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition">
+            <A href='create' class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
               <FaSolidAdd class="h-4 w-4" />
               Buat Artikel
             </A>
@@ -252,10 +254,17 @@ function Artikel() {
         </div>
       </div>
 
-      <Show when={modals()}>
+      <Show when={modals().open && modals().type==='delete'}>
         <Delete
-          item={selectItem()}
-          onClose={toggleModals}
+          item={modals().item}
+          onClose={closeModal}
+        />
+      </Show>
+
+      <Show when={modals().open && modals().type==='info'}>
+        <Info
+          item={modals().item}
+          onClose={closeModal}
         />
       </Show>
 

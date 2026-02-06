@@ -1,4 +1,26 @@
+import { FaSolidAdd } from 'solid-icons/fa';
+import { createSignal, For, Show } from 'solid-js';
+import CreateKategori from './modals/CreateKategori';
+import { listKategori } from './config/dataTable.js';
+import Tooltip from "./theme/ui/Tooltip.jsx";
+import { FaRegularEdit } from 'solid-icons/fa'
+import { RiSystemDeleteBinLine } from 'solid-icons/ri'
+
+
+const initialModals = { type:null, item:null, open:false }
+
 function Kategori() {
+  const [modals, setModals] = createSignal(initialModals);
+
+  const openModal = (type, item=null) => {
+    setModals({ type, item, open:true });
+  };
+
+  const closeModal = () => {
+    setModals(initialModals)
+  }
+
+
   const recentOrders = [
     { id: '#ORD-001', customer: 'John Smith', date: 'Today, 10:30 AM', amount: '$245.99', status: 'Completed' },
     { id: '#ORD-002', customer: 'Sarah Johnson', date: 'Today, 09:15 AM', amount: '$89.50', status: 'Processing' },
@@ -6,57 +28,101 @@ function Kategori() {
     { id: '#ORD-004', customer: 'Emma Wilson', date: 'Yesterday, 11:20 AM', amount: '$299.99', status: 'Pending' },
   ];
 
+  // id, name, slug, status
+  //
+  const headKategori = [
+    {key:'id', label:'ID', render: (item) => (
+      <td class="whitespace-nowrap text-sm font-medium text-blue-600">
+        {item.id}
+      </td>
+    )},
+    {key:'name', label:'Label'},
+    {key:'slug', label:'Slug'},
+    {
+      key: 'status', label: 'Status',
+      render: (item) => (
+        <span
+          class={`px-3 py-1 text-xs rounded-full ${
+            item.status === "1"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+        </span>
+      )},
+      {key:'action', label:'Action', render: (item)=>(
+        <div class="flex gap-2 text-md">
+          <Tooltip text='Edit Kategori' position='bottom'>
+            {/* <A href={`update/${item.slug}`}>*/}
+              <FaRegularEdit class="text-blue-700 cursor-pointer" />
+            {/* </A>*/}
+          </Tooltip>
+
+          <Tooltip text='Delete Kategori' position='bottom'>
+            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+          </Tooltip>
+        </div>
+      )}
+  ]
+
   return (<>
     <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-xl font-semibold">Kategori Artikel Produk</h1>
           <p class="text-sm text-gray-600">
-            Atur kategori khusus untuk artikel yang berisi informasi produk
+            Digunakan untuk mengelompokkan artikel yang berisi informasi produk berdasarkan kategori tertentu
           </p>
+        </div>
+
+        <div>
+          <button onCLick={() => openModal('create') } class="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
+            <FaSolidAdd class="h-4 w-4" />
+            Buat Kategori
+          </button>
         </div>
       </div>
     </div>
 
     <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800">Kategori Orders</h3>
+        <h3 class="text-lg font-semibold text-gray-800">Kategori Produk</h3>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            </tr>
+            <For each={headKategori}>
+              {(head) => (
+                <th class='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  {head.label}
+                </th>
+              )}
+            </For>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <For each={recentOrders}>
-              {(order) => (
+            <For each={listKategori}>
+              {(item) => (
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{order.id}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{order.customer}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{order.amount}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class={`px-3 py-1 text-xs rounded-full ${
-                      order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                      order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
+                  <For each={headKategori}>
+                    {(head) => (
+                      <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>
+                        {head.render ? head.render(item) : item[head.key]}
+                      </td>
+                    )}
+                  </For>
                 </tr>
               )}
             </For>
+
           </tbody>
         </table>
       </div>
     </div>
+
+    <Show when={modals().open && modals().type === 'create'}>
+      <CreateKategori item={modals().item} onClose={closeModal}/>
+    </Show>
   </>)
 }
 
