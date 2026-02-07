@@ -63,12 +63,12 @@ function Artikel() {
       render: (item) => (
         <span
           class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
+            item.status === 1
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+          {item.status === 1 ? "Aktif" : "Tidak Aktif"}
         </span>
       ),
     },
@@ -110,12 +110,12 @@ function Artikel() {
       render: (item) => (
         <span
           class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
+            item.status === 1
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+          {item.status === 1 ? "Aktif" : "Tidak Aktif"}
         </span>
       ),
     },
@@ -148,12 +148,12 @@ function Artikel() {
       render: (item) => (
         <span
           class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
+            item.status === 1
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
+          {item.status === 1 ? "Aktif" : "Tidak Aktif"}
         </span>
       ),
     },
@@ -172,8 +172,8 @@ function Artikel() {
 
   const dataTab = [
     { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => artikel()?.data || [] },
-    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: listArtikelProduk},
-    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: listArtikelPanduan },
+    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: () => produk()?.data || []},
+    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: () => panduan()?.data || []},
   ]
 
   return (
