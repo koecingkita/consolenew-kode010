@@ -2,7 +2,7 @@ import { AiOutlineSearch } from "solid-icons/ai";
 import { FaSolidAdd, FaSolidDownload } from "solid-icons/fa";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { BiRegularFilterAlt } from "solid-icons/bi";
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, createResource, For, Show, createEffect } from 'solid-js';
 import { listArtikel, listArtikelProduk, listArtikelPanduan } from './config/dataTable.js';
 import { FaRegularEdit } from 'solid-icons/fa'
 import { RiSystemDeleteBinLine } from 'solid-icons/ri'
@@ -11,14 +11,34 @@ import { A } from '@solidjs/router';
 import Tooltip from "./theme/ui/Tooltip.jsx";
 import Delete from './modals/Delete.jsx'
 import Info from './modals/Info.jsx'
+import { ArtikelService } from "./services/artikel.service.js";
 
-const initialModals = { type:null, item: null, open:false }
+const ARTIKEL = ArtikelService.get;
+const PANDUAN = ArtikelService.Panduan.get;
+const PRODUK = ArtikelService.Produk.get;
 
+const initialModals = { type: null, item: null, open: false }
 
 function Artikel() {
   const [tab, setTab] = createSignal(0);
   const [modals, setModals] = createSignal(initialModals);
+  const [artikel] = createResource(ARTIKEL);
+  const [panduan] = createResource(PANDUAN);
+  const [produk] = createResource(PRODUK);
 
+  createEffect(() => {
+    const dataArtikel = artikel();
+    const dataPanduan = panduan();
+    const dataProduk = produk();
+
+    if (!dataArtikel) return;
+    if (!dataPanduan) return;
+    if (!dataProduk) return;
+
+    console.log('dataArtikel:', dataArtikel);
+    console.log('dataPanduan:', dataPanduan);
+    console.log('dataProduk:', dataProduk);
+  })
   const openModal = (type, item=null) => {
     setModals({ type, item, open:true });
   };
@@ -151,7 +171,7 @@ function Artikel() {
   ];
 
   const dataTab = [
-    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: listArtikel },
+    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => artikel()?.data || [] },
     { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: listArtikelProduk},
     { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: listArtikelPanduan },
   ]
@@ -236,7 +256,14 @@ function Artikel() {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              <For each={dataTab[tab()].dataBody}>
+              <Show when={artikel()?.data} fallback={
+                <tr>
+                  <td colspan={dataTab[tab()].dataHead.length} class='px-6 py-4 text-center'>
+                    Loading ...
+                  </td>
+                </tr>
+              }>
+              <For each={dataTab[tab()].dataBody()}>
                 {(item) => (
                   <tr class="hover:bg-gray-50 transition-colors">
                     <For each={dataTab[tab()].dataHead}>
@@ -249,6 +276,8 @@ function Artikel() {
                   </tr>
                 )}
               </For>
+
+              </Show>
             </tbody>
           </table>
         </div>

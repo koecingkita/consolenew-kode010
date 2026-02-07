@@ -5,6 +5,9 @@ import { listTag } from './config/dataTable.js';
 import { FaRegularEdit } from 'solid-icons/fa'
 import { RiSystemDeleteBinLine } from 'solid-icons/ri'
 import Tooltip from "./theme/ui/Tooltip.jsx";
+import { BiRegularFilterAlt } from "solid-icons/bi";
+import { BsSortDownAlt } from "solid-icons/bs";
+import { AiOutlineSearch } from "solid-icons/ai";
 
 
 const initialModals = { type:null, item:null, open:false }
@@ -80,6 +83,24 @@ function Tag() {
             <FaSolidAdd class="h-4 w-4" />
             Buat Tag
           </button>
+        </div>
+      </div>
+
+      <div class='flex flex-row gap-4 mt-8 justify-between'>
+        <div>
+          <div class='relative'>
+            <input placeholder='Cari tag ...' class='w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white' />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400">
+              <AiOutlineSearch />
+            </span>
+          </div>
+        </div>
+
+        <div class='flex flex-wrap items-center gap-2'>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BiRegularFilterAlt />Filter</button>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BsSortDownAlt />Sort</button>
         </div>
       </div>
     </div>

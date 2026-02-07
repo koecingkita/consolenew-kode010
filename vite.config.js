@@ -12,9 +12,16 @@ export default ({ mode }) => {
       host: true,
       port: Number(env.VITE_PORT),
       staticPort: true,
+      proxy: {
+        "/api": {
+          target: env.VITE_API_BASE_URL,
+          changeOrigin: true
+        }
+      }
     },
     build: {
       target: "esnext",
     },
+
   });
 };

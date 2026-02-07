@@ -1,16 +1,29 @@
 import { FaSolidAdd } from 'solid-icons/fa';
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, createResource, For, Show, createEffect } from 'solid-js';
 import CreateKategori from './modals/CreateKategori';
 import { listKategori } from './config/dataTable.js';
 import Tooltip from "./theme/ui/Tooltip.jsx";
 import { FaRegularEdit } from 'solid-icons/fa'
 import { RiSystemDeleteBinLine } from 'solid-icons/ri'
+import { AiOutlineSearch } from "solid-icons/ai";
+import { BiRegularFilterAlt } from "solid-icons/bi";
+import { BsSortDownAlt } from "solid-icons/bs";
+import { KategoriService } from './services/kategori.service';
 
+const initialModals = { type: null, item: null, open: false }
 
-const initialModals = { type:null, item:null, open:false }
 
 function Kategori() {
   const [modals, setModals] = createSignal(initialModals);
+  const [kategori] = createResource(KategoriService.get);
+
+  createEffect(() => {
+    const data = kategori();
+    if (!data) return;
+
+    console.log("kategori:sz", data);
+  });
+
 
   const openModal = (type, item=null) => {
     setModals({ type, item, open:true });
@@ -21,13 +34,6 @@ function Kategori() {
   }
 
 
-  const recentOrders = [
-    { id: '#ORD-001', customer: 'John Smith', date: 'Today, 10:30 AM', amount: '$245.99', status: 'Completed' },
-    { id: '#ORD-002', customer: 'Sarah Johnson', date: 'Today, 09:15 AM', amount: '$89.50', status: 'Processing' },
-    { id: '#ORD-003', customer: 'Mike Brown', date: 'Yesterday, 3:45 PM', amount: '$156.75', status: 'Completed' },
-    { id: '#ORD-004', customer: 'Emma Wilson', date: 'Yesterday, 11:20 AM', amount: '$299.99', status: 'Pending' },
-  ];
-
   // id, name, slug, status
   //
   const headKategori = [
@@ -36,21 +42,8 @@ function Kategori() {
         {item.id}
       </td>
     )},
-    {key:'name', label:'Label'},
+    {key:'label', label:'Label'},
     {key:'slug', label:'Slug'},
-    {
-      key: 'status', label: 'Status',
-      render: (item) => (
-        <span
-          class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-        </span>
-      )},
       {key:'action', label:'Action', render: (item)=>(
         <div class="flex gap-2 text-md">
           <Tooltip text='Edit Kategori' position='bottom'>
@@ -83,6 +76,28 @@ function Kategori() {
           </button>
         </div>
       </div>
+
+      <div class='flex flex-row gap-4 mt-8 justify-between'>
+        <div>
+          <div class='relative'>
+            <input placeholder='Cari kategori ...' class='w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white' />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400">
+              <AiOutlineSearch />
+            </span>
+          </div>
+        </div>
+
+        <div class='flex flex-wrap items-center gap-2'>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BiRegularFilterAlt />Filter</button>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BsSortDownAlt />Sort</button>
+        </div>
+
+
+      </div>
+
+
     </div>
 
     <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -100,22 +115,39 @@ function Kategori() {
               )}
             </For>
           </thead>
-          <tbody class="divide-y divide-gray-200">
-            <For each={listKategori}>
-              {(item) => (
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <For each={headKategori}>
-                    {(head) => (
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>
-                        {head.render ? head.render(item) : item[head.key]}
-                      </td>
-                    )}
-                  </For>
-                </tr>
-              )}
-            </For>
 
+
+          <tbody class="divide-y divide-gray-200">
+            <Show
+              when={kategori()}
+              fallback={
+                <tr>
+                  <td colspan={headKategori.length} class="px-6 py-4 text-center">
+                    Loading...
+                  </td>
+                </tr>
+              }
+            >
+              {(res) => (
+                <For each={res().data}>
+                  {(item) => (
+                    <tr class="hover:bg-gray-50 transition-colors">
+                      <For each={headKategori}>
+                        {(head) => (
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                            {head.render ? head.render(item) : item[head.key]}
+                          </td>
+                        )}
+                      </For>
+                    </tr>
+                  )}
+                </For>
+              )}
+            </Show>
           </tbody>
+
+
+
         </table>
       </div>
     </div>
