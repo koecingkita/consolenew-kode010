@@ -11,12 +11,29 @@ const jenisArtikel = [
 ]
 
 function CreateArtikel(props) {
+  const initialMeta = [
+    { label:'judulArtikel', value: ''},
+    { label:'image', value: ''},
+    { label:'imageAlt', value: ''},
+    { label:'metaTitle', value: ''},
+    { label:'metaSlug', value: ''},
+    { label:'metaDeskripsi', value: ''},
+    { label:'metaKeyword', value: ''},
+    { label:'metaTag', value: ''},
+  ]
+  const initialBody = { label:'content', value:''}
+  const initialArtikel = { meta: initialMeta, content:initialBody };
+
   const location = useLocation();
-  const [artikel, setArtikel] = createSignal(0);
+  const [artikel, setArtikel] = createSignal(initialArtikel);
+  const [content, setContent] = createSignal(initialBody);
+  const [meta, setMeta] = createSignal(initialMeta);
 
   createEffect(() => {
     console.log("query:", location.pathname);
   })
+
+  const handleSubmit = () => { }
 
   return (<Container>
 
@@ -71,7 +88,7 @@ function CreateArtikel(props) {
       </div>
     </div>
 
-    <TextRich />
+    <TextRich handleAction={handleSubmit} content={content} />
 
     <div class='flex flex-col mt-8 rounded-xl w-full max-w-6xl mx-auto'>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-5 bg-white rounded-xl shadow-sm p-6 border-gray-200">
@@ -105,7 +122,7 @@ function CreateArtikel(props) {
       <div class='flex gap-2 justify-end'>
         <div class='flex gap-2 bg-white p-4 rounded-xl shadow-sm'>
           <button type="button" class="text-red-600 border border-red-500 shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer hover:bg-gray-50 hover:text-red-400">Cancel</button>
-          <button type="button" class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer">Create Artikel</button>
+          <button type="button" onClick={handleSubmit} class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer">Create Artikel</button>
         </div>
       </div>
     </div>
