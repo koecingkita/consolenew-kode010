@@ -8,7 +8,6 @@ import { Color } from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import Blockquote from "@tiptap/extension-blockquote";
 
 /* ================= IMAGE BLOCK ================= */
 const ImageBlock = Node.create({
@@ -52,82 +51,59 @@ const FontSize = TextStyle.extend({
   },
 });
 
-/* ================= LIST (TAILWIND CLASS) ================= */
+/* ================= BULLET LIST (TAILWIND CLASS) ================= */
 const BulletListTW = BulletList.extend({
   renderHTML({ HTMLAttributes }) {
     return [
       "ul",
       mergeAttributes(HTMLAttributes, {
-        class: "list-disc pl-6 my-2",
+        class: "list-disc pl-6",
       }),
       0,
     ];
   },
 });
 
+/* ================= ORDERED LIST (TAILWIND CLASS) ================= */
 const OrderedListTW = OrderedList.extend({
   renderHTML({ HTMLAttributes }) {
     return [
       "ol",
       mergeAttributes(HTMLAttributes, {
-        class: "list-decimal pl-6 my-2",
+        class: "list-decimal pl-6",
       }),
       0,
     ];
   },
 });
 
-/* ================= QUOTE (TAILWIND CLASS) ================= */
-const BlockquoteTW = Blockquote.extend({
-  renderHTML({ HTMLAttributes }) {
-    return [
-      "blockquote",
-      mergeAttributes(HTMLAttributes, {
-        class:
-          "border-l-4 border-gray-300 pl-4 italic text-gray-600 my-3",
-      }),
-      0,
-    ];
-  },
-});
-
-/* ================= EDITOR ================= */
 export default function TiptapSolidEditor(props) {
   let editorEl;
-  let editor;
-
-  const [heading, setHeading] = createSignal("p");
-  const [fontSize, setFontSize] = createSignal("16");
-  const [textColor, setTextColor] = createSignal("#111827");
+  const [ed, setEd] = createSignal(null);
 
   const emitChange = () => {
+    const editor = ed();
     if (!editor) return;
     props?.onChange?.(editor.getJSON(), editor.getHTML());
   };
 
   onMount(() => {
-    editor = new Editor({
+    const editor = new Editor({
       element: editorEl,
       extensions: [
-        // Matikan list & quote bawaan
         StarterKit.configure({
-          hardBreak: true,
           bulletList: false,
           orderedList: false,
-          blockquote: false,
         }),
 
-        // Custom Tailwind blocks
+        // our overridden list
         BulletListTW,
         OrderedListTW,
-        BlockquoteTW,
 
-        // Text styling
         Underline,
         TextStyle,
-        Color.configure({ types: ["textStyle"] }),
         FontSize,
-
+        Color.configure({ types: ["textStyle"] }),
         TextAlign.configure({
           types: ["heading", "paragraph", "blockquote"],
         }),
@@ -135,7 +111,7 @@ export default function TiptapSolidEditor(props) {
         Image.configure({ inline: false }),
         ImageBlock,
       ],
-      content: props?.initialJSON || {
+      content: {
         type: "doc",
         content: [{ type: "paragraph" }],
       },
@@ -148,40 +124,34 @@ export default function TiptapSolidEditor(props) {
       },
     });
 
+    setEd(editor);
+
     emitChange();
   });
 
-  onCleanup(() => editor?.destroy());
+  onCleanup(() => ed()?.destroy());
 
   const btn = (active) =>
-    `px-2 py-1 text-xs rounded-md border ${
-      active ? "bg-black text-white" : "bg-white hover:bg-gray-50"
+    `px-2 py-1 text-xs rounded border ${
+      active ? "bg-black text-white" : "bg-white"
     }`;
 
   return (
     <div class="w-full">
       {/* TOOLBAR */}
-      <div class="flex flex-wrap gap-2 mb-3 items-center">
-        {/* LIST */}
+      <div class="flex flex-wrap gap-2 mb-3">
         <button
-          class={btn(editor?.isActive("bulletList"))}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          class={btn(ed()?.isActive("bulletList"))}
+          onClick={() => ed()?.chain().focus().toggleBulletList().run()}
         >
           • List
         </button>
+
         <button
-          class={btn(editor?.isActive("orderedList"))}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          class={btn(ed()?.isActive("orderedList"))}
+          onClick={() => ed()?.chain().focus().toggleOrderedList().run()}
         >
           1. List
-        </button>
-
-        {/* QUOTE */}
-        <button
-          class={btn(editor?.isActive("blockquote"))}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        >
-          Quote
         </button>
       </div>
 
