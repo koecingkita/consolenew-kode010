@@ -224,21 +224,25 @@ export default function TiptapSolidEditor(props) {
   }
 
   const toggleLinkInput = () => {
+    // Cek apakah ada teks yang diselect
     const { from, to } = editor.state.selection;
     const hasSelection = from !== to;
-    if (!hasSelection && !editor.isActive('link')) {
-      alert('Pilih teks terlebih dahulu untuk menambahkan link!');
+
+    if (!hasSelection && !editor.isActive("link")) {
+      // Jika tidak ada teks yang di-block dan tidak ada link aktif, tidak lakukan apa-apa
+      alert("Pilih teks terlebih dahulu untuk menambahkan link!");
       return;
     }
 
     if (editor.isActive("link")) {
+      // Jika sudah ada link, ambil URL-nya
       const previousUrl = editor.getAttributes("link").href;
       setLinkUrl(previousUrl || "");
     } else {
       setLinkUrl("");
     }
     setShowLinkInput(!showLinkInput());
-  }
+  };
 
   return (
     <div class="w-full">
