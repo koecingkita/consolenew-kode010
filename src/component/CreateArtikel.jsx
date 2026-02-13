@@ -15,7 +15,7 @@ function CreateArtikel(props) {
     { label:'judulArtikel', value: ''},
     { label:'image', value: ''},
     { label:'imageAlt', value: ''},
-    { label:'metaTitle', value: ''},
+    { label:'metaTitle', value: 'metatitle'},
     { label:'metaSlug', value: ''},
     { label:'metaDeskripsi', value: ''},
     { label:'metaKeyword', value: ''},
@@ -52,7 +52,8 @@ function CreateArtikel(props) {
   }
   const bentukData = { dataSatu, dataDua }
   const handleSubmitData = () => {
-    const tmpData = { ...bentukData, dataDua:{ ...dataDua, value:'dataaa'} };
+    const tmpData = { ...bentukData, dataDua:{ ...dataDua, value:'dataaa'}, dataSatu: dataSatu.map(item => item.label === 'firstName' ? { ...item, value: dataBaru'} : item) }; // kalo mau set value firstName gimana
+    const tmpData = { ...bentukData, dataDua:{ ...dataDua, value:'dataaa'}, dataSatu: dataSatu.map(item => item.label === 'firstName' ? { ...item, value: dataBaru'} : item) }; // kalo mau set value firstName gimana
 
     return tmpData
   }
@@ -164,7 +165,7 @@ function CreateArtikel(props) {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-5 bg-white rounded-xl shadow-sm p-6 border-gray-200">
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Title</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah'/>
+          <input value={artikel().meta[4].value} type='text' oninput={(e) => setArtikel({ ...artikel, meta: meta.map(item => item.label === 'metaTitle' ? { ...item, value: e.target.value } : item ) })} class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah'/>
         </div>
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Slug</label>
