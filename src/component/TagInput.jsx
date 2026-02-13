@@ -46,7 +46,7 @@ export default function TagInput() {
       <div
         class={`flex flex-wrap items-center gap-2 rounded-md border p-2 ${
           isMax()
-            ? "border-gray-300 bg-gray-50"
+            ? "border-gray-300 bg-gray-100"
             : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-500"
         }`}
       >

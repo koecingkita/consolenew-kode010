@@ -1,152 +1,203 @@
-import { createSignal } from "solid-js";
-import TiptapSolidEditor from "./TextRich";
+import Container from "./theme/ui/ContainerContent";
+import TextRich from "./TextRich";
+import TagInput from "./TagInput";
+import { useLocation } from "@solidjs/router";
+import { createEffect, createSignal, For, Show } from "solid-js";
 
-export default function CreateArtikel() {
-  const [title, setTitle] = createSignal("");
+const jenisArtikel = [
+  { id: 1, label:'Artikel'},
+  { id: 2, label:'Produk'},
+  { id: 3, label:'Panduan'}
+]
+
+function CreateArtikel(props) {
+  const initialMeta = [
+    { label:'judulArtikel', value: ''},
+    { label:'image', value: ''},
+    { label:'imageAlt', value: ''},
+    { label:'metaTitle', value: ''},
+    { label:'metaSlug', value: ''},
+    { label:'metaDeskripsi', value: ''},
+    { label:'metaKeyword', value: ''},
+    { label:'metaTag', value: ''},
+  ]
+  const initialBody = { label:'content', value:''}
+  const initialArtikel = { meta:initialMeta, content:initialBody };
+
+  const location = useLocation();
+  const [artikel, setArtikel] = createSignal(initialArtikel);
+
+  const [content, setContent] = createSignal(initialBody);
+  const [meta, setMeta] = createSignal(initialMeta);
+  const [contentBlocks, setContentBlock] = createSignal([]);
+  const [editorData, setEditorData] = createSignal(null);
+
   const [contentJSON, setContentJSON] = createSignal(null);
   const [contentHTML, setContentHTML] = createSignal("");
 
-  const [imageUrl, setImageUrl] = createSignal("");
-  const [imageAlign, setImageAlign] = createSignal("center"); // left|center|right
-  const [imageSize, setImageSize] = createSignal(100); // 25|50|75|100
 
-  let editorApi = null;
+/*
 
-  const insertImage = () => {
-    const url = imageUrl().trim();
-    if (!url) return alert("Masukkan URL gambar dulu.");
+  const [data, setData] = createSignal({ type:null, status:false});
+  const handleData = () => {
+    setData({...data(), type:'open', status: true});
+  }
 
-    editorApi?.insertImage?.(url, imageAlign(), imageSize());
-    setImageUrl("");
-  };
+  const dataSatu = [
+    { label:'firstName', value:'pertama' },
+    { label:'lastName', value:'kedua' },
+  ]
+  const dataDua = {
+    label:'content', value:'isi'
+  }
+  const bentukData = { dataSatu, dataDua }
+  const handleSubmitData = () => {
+    const tmpData = { ...bentukData, dataDua:{ ...dataDua, value:'dataaa'} };
 
-  const save = async () => {
-    const payload = {
-      title: title(),
-      content_json: contentJSON(),
-      content_html: contentHTML(),
-    };
+    return tmpData
+  }
 
-    console.log("PAYLOAD SAVE:", payload);
-    alert("Cek console: payload siap disimpan.");
-  };
+*/
 
-  return (
-    <div class="max-w-6xl mx-auto p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-semibold">Create Artikel</h1>
-        <button
-          type="button"
-          class="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
-          onClick={save}
-        >
-          Simpan
-        </button>
+
+
+  createEffect(() => {
+    console.log("query:", location.pathname);
+  })
+
+
+  const handleSave = () => {
+    console.log("SAVE");
+    const tmpData = { ...initialArtikel, initialBody: { ...initialBody, value: contentJSON()} }
+
+    console.log('temporary Data: ', tmpData);
+    return;
+  }
+
+  const handlePublish = () => {
+    console.log("PUBLISH");
+    const tmpData = { ...initialArtikel, initialBody: { ...initialBody, value: [contentJSON(), contentHTML()] } }
+
+    console.log('temporary Data: ', tmpData);
+    return;
+  }
+
+
+  const handleInput = (blocks) => {
+    setContentBlock(blocks)
+  }
+
+  return (<Container>
+
+    <div class='flex flex-col rounded-xl w-full max-w-6xl mx-auto '>
+      <div class="flex flex-col gap-6 mx-6 mb-5">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Jenis Artikel</label>
+          <select value={artikel()} onChange={(e) => setArtikel(e.target.value)} id="artikeljenis" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <option selected disabled>Pilih jenis artikel</option>
+            <For each={jenisArtikel}>
+              {(item) => (
+                    <option value={item.id}>{item.label}</option>
+              )}
+            </For>
+          </select>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-4">
-        {/* Judul */}
-        <div class="bg-white border rounded-xl p-4">
-          <label class="block text-sm font-medium mb-2">Judul</label>
-          <input
-            class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-black/10"
-            value={title()}
-            onInput={(e) => setTitle(e.currentTarget.value)}
-            placeholder="Judul artikel..."
-          />
-        </div>
-
-        {/* Toolbar Insert Image URL */}
-        <div class="bg-white border rounded-xl p-4">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div class="flex-1">
-              <label class="block text-sm font-medium mb-2">Image URL</label>
-              <input
-                class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-black/10"
-                value={imageUrl()}
-                onInput={(e) => setImageUrl(e.currentTarget.value)}
-                placeholder="https://....jpg / .png / .webp"
-              />
-              <div class="text-[11px] text-gray-500 mt-1">
-                Gambar akan jadi block sendiri + otomatis ada paragraf kosong setelahnya.
-              </div>
-            </div>
-
-            <div class="w-full sm:w-36">
-              <label class="block text-sm font-medium mb-2">Align</label>
-              <select
-                class="w-full border rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-black/10"
-                value={imageAlign()}
-                onChange={(e) => setImageAlign(e.currentTarget.value)}
-              >
-                <option value="left">Kiri</option>
-                <option value="center">Tengah</option>
-                <option value="right">Kanan</option>
-              </select>
-            </div>
-
-            <div class="w-full sm:w-28">
-              <label class="block text-sm font-medium mb-2">Size</label>
-              <select
-                class="w-full border rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-black/10"
-                value={imageSize()}
-                onChange={(e) => setImageSize(Number(e.currentTarget.value))}
-              >
-                <option value={25}>25%</option>
-                <option value={50}>50%</option>
-                <option value={75}>75%</option>
-                <option value={100}>100%</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              class="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
-              onClick={insertImage}
-            >
-              Insert Image
-            </button>
+      <Show when={artikel() === '2'}>
+        <div class="flex flex-col gap-6 mx-6 mb-5">
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Kategori Produk</label>
+            <select id="artikeljenis" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              <option selected disabled>Pilih jenis artikel</option>
+              <option value="pulsa" >Pulsa</option>
+              <option value="paket internet" >Paket Internet</option>
+              <option value="ppob" >PPOB</option>
+              <option value="e wallet" >E Wallet</option>
+            </select>
           </div>
         </div>
+      </Show>
 
-        {/* Editor + Output */}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Editor */}
-          <div class="bg-white border rounded-xl p-4 lg:col-span-1">
-            <TiptapSolidEditor
-              initialJSON={contentJSON()}
-              onChange={(json, html) => {
-                setContentJSON(json);
-                setContentHTML(html);
-              }}
-              setApi={(api) => (editorApi = api)}
-            />
-          </div>
+      <div class="flex flex-col gap-6 mx-6 mb-5">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Judul Artikel</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah' />
+          <p class="mt-1 text-xs text-gray-500">Judul akan tampil sebagai headline utama</p>
+        </div>
+      </div>
 
-          {/* JSON Output */}
-          <div class="bg-white border rounded-xl p-4 lg:col-span-1">
-            <div class="text-sm font-semibold mb-2">JSON Output</div>
-            <pre class="text-xs bg-gray-50 p-3 rounded-lg overflow-auto max-h-[560px]">
-              {JSON.stringify(contentJSON(), null, 2)}
-            </pre>
-          </div>
+      <div class="flex flex-col gap-6 mx-6 mb-5">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
 
-          {/* HTML Output + Preview */}
-          <div class="bg-white border rounded-xl p-4 lg:col-span-1">
-            <div class="text-sm font-semibold mb-2">HTML Output</div>
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Image</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='https://domain.com/images.webp'/>
 
-            <pre class="text-xs bg-gray-50 p-3 rounded-lg overflow-auto max-h-[220px]">
-              {contentHTML()}
-            </pre>
+          <label class="block mb-2.5 mt-5 text-sm font-medium text-heading" for="file_input">Keterangan image</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Gambar adaku - Top up pulsa murah'/>
 
-            <div class="mt-4">
-              <div class="text-sm font-semibold mb-2">Preview</div>
-
-              <div class="prose max-w-none" innerHTML={contentHTML()} />
-            </div>
-          </div>
         </div>
       </div>
     </div>
-  );
+
+    {/* <TextRich oninput={handleInput} />*/}
+    <TextRich
+      initialJSON={contentJSON()}
+      onChange={(json, html) => {
+        // simpan json ke state/DB
+        console.log("DOC JSON:", json);
+        setContentJSON(json);
+        setContentHTML(html);
+      }}
+    />
+
+
+{/*
+    <pre class="text-xs bg-gray-50 p-3 rounded-lg overflow-auto max-h-[220px]">
+      {contentHTML()}
+    </pre>
+    <pre>{JSON.stringify(contentJSON(), null, 2)}</pre>
+*/}
+
+
+    <div class='flex flex-col mt-8 rounded-xl w-full max-w-6xl mx-auto'>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-5 bg-white rounded-xl shadow-sm p-6 border-gray-200">
+        <div class="">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Title</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah'/>
+        </div>
+        <div class="">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Slug</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: top-up-pulsa-murah'/>
+        </div>
+        <div class="">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Deskripsi</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Adaku adalah aplikasi digital yang menjual produk-produk PPOB ...'/>
+        </div>
+        <div class="">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Keyword</label>
+          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up Pulsa, Pulsa Murah, Pulsa Bebas Denom ...'/>
+        </div>
+        <div class="">
+          <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Tag</label>
+          <TagInput />
+          {/*
+            <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'/>
+          */}
+        </div>
+      </div>
+    </div>
+
+    <div class='w-full max-w-6xl mx-auto mb-20 p-6'>
+      <div class='flex gap-2 justify-end'>
+        <div class='flex gap-2 bg-white p-4 rounded-xl shadow-sm'>
+          <button type="button" class="text-red-600 border border-red-500 shadow-xs font-medium leading-5 rounded-md text-sm px-4 py-1 focus:outline-none hover:cursor-pointer hover:bg-gray-50 hover:text-red-400">Cancel</button>
+          <button type="button" onClick={handleSave} class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-md text-sm px-4 focus:outline-none hover:cursor-pointer">Save</button>
+          <button type="button" onClick={handlePublish} class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-md text-sm px-4 focus:outline-none hover:cursor-pointer">Publish Artikel</button>
+        </div>
+      </div>
+    </div>
+  </Container>);
 }
+
+export default CreateArtikel;
