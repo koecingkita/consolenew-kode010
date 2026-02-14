@@ -13,7 +13,12 @@ export const ArtikelService = {
     return api.get(path);
   },
   detail: (id) => api.get(`/api/artikel/${id}`),
-  create: (data) => api.post("/api/artikel", data),
+
+  create: (data) => {
+    api.post(ARTIKEL.create, data);
+  },
+
+
   update: (id, data) => api.put(`/api/artikel/${id}`, data),
   remove: (id) => api.delete(`/api/artikel/${id}`),
 

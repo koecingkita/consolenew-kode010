@@ -3,6 +3,9 @@ import TextRich from "./TextRich";
 import TagInput from "./TagInput";
 import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
+import { ArtikelService } from "./services/artikel.service.js";
+
+const CREATE_ARTIKEL = ArtikelService.create;
 
 const jenisArtikel = [
   { id: 1, label:'Artikel'},
@@ -15,7 +18,7 @@ function CreateArtikel(props) {
     { label:'judulArtikel', value: ''},
     { label:'image', value: ''},
     { label:'imageAlt', value: ''},
-    { label:'metaTitle', value: 'metatitle'},
+    { label:'metaTitle', value: ''},
     { label:'metaSlug', value: ''},
     { label:'metaDeskripsi', value: ''},
     { label:'metaKeyword', value: ''},
@@ -66,12 +69,41 @@ function CreateArtikel(props) {
     console.log("query:", location.pathname);
   })
 
+  const renameProperties = (dataChangeName, dataArray) => {
+    const renameMap = Object.assign({}, ...dataChangeName);
+
+    return dataArray.map(obj => {
+      const [[key, value]] = Object.entries(obj);
+
+      return {
+        [rename[key] ?? key]: value
+      }
+    })
+  }
+
 
   const handleSave = () => {
     console.log("SAVE");
-    const tmpData = { ...initialArtikel, initialBody: { ...initialBody, value: contentJSON()} }
+    const tmpData = { ...artikel(), content: { ...artikel().initialBody, value: contentJSON()} }
 
-    console.log('temporary Data: ', tmpData);
+    // console.log('temporary Data: ', tmpData);
+    console.log('temporary Data: ',
+      {
+        ...Object.fromEntries(
+          tmpData.meta.map(item => [item.label, item.value])
+        ),
+        content: tmpData.content.value
+      }
+    );
+
+    const gass = CREATE_ARTIKEL({
+      ...Object.fromEntries(
+        tmpData.meta.map(item => [item.label, item.value])
+      ),
+      content: tmpData.content.value
+    })
+    console.log('gass Data: ', gass);
+
     return;
   }
 
@@ -86,6 +118,22 @@ function CreateArtikel(props) {
 
   const handleInput = (blocks) => {
     setContentBlock(blocks)
+  }
+
+  const updateMetaByLabel = (label, value) => {
+    setArtikel({
+      ...artikel(),
+      meta: artikel().meta.map(item =>
+        item.label === label
+          ? { ...item, value }
+          : item
+      )
+    })
+  }
+
+  const getMetaValue = (label) => {
+    const item = artikel().meta.find(m => m.label === label);
+    return item ? item.value : '';
   }
 
   return (<Container>
@@ -123,7 +171,7 @@ function CreateArtikel(props) {
       <div class="flex flex-col gap-6 mx-6 mb-5">
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Judul Artikel</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah' />
+          <input value={getMetaValue('judulArtikel')} oninput={(e) => updateMetaByLabel('judulArtikel', e.target.value)} type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah' />
           <p class="mt-1 text-xs text-gray-500">Judul akan tampil sebagai headline utama</p>
         </div>
       </div>
@@ -132,10 +180,10 @@ function CreateArtikel(props) {
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
 
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Image</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='https://domain.com/images.webp'/>
+          <input type='text' value={getMetaValue('image')} oninput={(e) => updateMetaByLabel('image', e.target.value)} class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='https://domain.com/images.webp'/>
 
           <label class="block mb-2.5 mt-5 text-sm font-medium text-heading" for="file_input">Keterangan image</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Gambar adaku - Top up pulsa murah'/>
+          <input type='text' value={getMetaValue('imageAlt')} oninput={(e) => updateMetaByLabel('imageAlt', e.target.value)} class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Gambar adaku - Top up pulsa murah'/>
 
         </div>
       </div>
@@ -165,19 +213,19 @@ function CreateArtikel(props) {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-5 bg-white rounded-xl shadow-sm p-6 border-gray-200">
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Title</label>
-          <input value={artikel().meta[4].value} type='text' oninput={(e) => setArtikel({ ...artikel, meta: meta.map(item => item.label === 'metaTitle' ? { ...item, value: e.target.value } : item ) })} class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah'/>
+          <input value={getMetaValue('metaTitle')} type='text' oninput={(e) => updateMetaByLabel('metaTitle', e.target.value)} class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up pulsa murah'/>
         </div>
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Slug</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: top-up-pulsa-murah'/>
+          <input value={getMetaValue('metaSlug')} oninput={(e) => updateMetaByLabel('metaSlug', e.target.value)} type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: top-up-pulsa-murah'/>
         </div>
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Deskripsi</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Adaku adalah aplikasi digital yang menjual produk-produk PPOB ...'/>
+          <input value={getMetaValue('metaDeskripsi')} oninput={(e) => updateMetaByLabel('metaDeskripsi', e.target.value)} type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Adaku adalah aplikasi digital yang menjual produk-produk PPOB ...'/>
         </div>
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Keyword</label>
-          <input type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up Pulsa, Pulsa Murah, Pulsa Bebas Denom ...'/>
+          <input value={getMetaValue('metaKeyword')} oninput={(e) => updateMetaByLabel('metaKeyword', e.target.value)} type='text' class='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' placeholder='Contoh: Top up Pulsa, Pulsa Murah, Pulsa Bebas Denom ...'/>
         </div>
         <div class="">
           <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">Meta Tag</label>
