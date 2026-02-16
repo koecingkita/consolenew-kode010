@@ -1,4 +1,31 @@
 async function apiFetch(path, options = {}) {
+  const result = {
+    data: null,
+    error: null,
+    loading: true
+  }
+  try {
+    const res = await fetch(`${path}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      ...options
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    result.data = await res.json();
+    result.loading = false;
+  } catch (e) {
+    result.error = error;
+    result.loading = false;
+    return result;
+  }
+
+/*
   const res = await fetch(`${path}`, {
     headers: {
       "Content-Type": "application/json",
@@ -12,6 +39,8 @@ async function apiFetch(path, options = {}) {
   }
 
   return res.json();
+*/
+
 }
 
 export const api = {

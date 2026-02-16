@@ -4,12 +4,8 @@ import { apiEndpoints } from "../config/config";
 const KATEGORI = apiEndpoints.kategori;
 
 export const KategoriService = {
-  get: (value) => {
-
+  get: (value = '') => {
     const path = !value ? KATEGORI.get+value : KATEGORI.get;
-    console.log("FETCH URL:", path); // kok ada /true nya?
-
-
     return api.get(path);
   },
   detail: (id) => api.get(`/api/artikel/${id}`),
