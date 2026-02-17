@@ -5,6 +5,7 @@ import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, For, Show, createResource } from "solid-js";
 import { ArtikelService } from "./services/artikel.service.js";
 import { KategoriService } from "./services/kategori.service.js";
+import { useAuth } from "./context/AuthContext";
 
 const CREATE_ARTIKEL = ArtikelService.create;
 const GET_KATEGORI = KategoriService.get;
@@ -16,6 +17,7 @@ const jenisArtikel = [
 ];
 
 function CreateArtikel(props) {
+  const { author } = useAuth();
   const initialMeta = [
     { label: 'contentJudul', value: '' },
     { label: 'contentImage', value: '' },
@@ -39,9 +41,10 @@ function CreateArtikel(props) {
   // Resource untuk kategori
   const [kategori] = createResource(async () => {
     const result = await GET_KATEGORI();
-    console.log("Kategori result:", result);
     return result;
   });
+
+  const kategoriList = () => kategori()?.data?.data ?? [];
 
   const location = useLocation();
 
@@ -67,7 +70,8 @@ function CreateArtikel(props) {
         metaArray.map(item => [item.label, item.value])
       ),
       content: tmpData.content?.value,
-      jenisArtikelId: jenisArtikelId() // Tambahkan ID jenis artikel
+      kategori: jenisArtikelId(),
+      author
     };
 
     const gass = CREATE_ARTIKEL(dataObject);
@@ -155,7 +159,7 @@ function CreateArtikel(props) {
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   >
                     <option value="" disabled selected>Pilih kategori produk</option>
-                    <For each={kategori.latest?.data ?? []}>
+                    <For each={kategoriList()}>
                       {(item) => (
                         <option value={item.id}>{item.label}</option>
                       )}

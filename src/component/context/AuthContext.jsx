@@ -10,6 +10,7 @@ const AppName = import.meta.env.VITE_APP_NAME;
 
 export function AuthProvider(props) {
   const [role, setRole] = createSignal('guest');
+  const author = '2e7aaac0-a184-4450-912b-322689891315';
   /*
   const [user, setUser] = createSignal('');
   const [accessToken, setAccessToken] = createSignal("");
@@ -96,7 +97,8 @@ export function AuthProvider(props) {
   //
   const value = {
     role: "aaaaa",
-    AppName
+    AppName,
+    author
   }
 
   return (

@@ -19,8 +19,9 @@ async function apiFetch(path, options = {}) {
 
     result.data = await res.json();
     result.loading = false;
+    return result;
   } catch (e) {
-    result.error = error;
+    result.error = e;
     result.loading = false;
     return result;
   }
@@ -46,20 +47,17 @@ async function apiFetch(path, options = {}) {
 export const api = {
   get: (path) => apiFetch(path),
 
-  post: (path, data) =>
-    apiFetch(path, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+  post: (path, data) => apiFetch(path, {
+    method: "POST",
+    body: JSON.stringify(data),
+  }),
 
-  put: (path, data) =>
-    apiFetch(path, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
+  put: (path, data) => apiFetch(path, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  }),
 
-  delete: (path) =>
-    apiFetch(path, {
-      method: "DELETE",
-    }),
+  delete: (path) => apiFetch(path, {
+    method: "DELETE",
+  }),
 };
