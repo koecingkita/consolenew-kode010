@@ -35,6 +35,7 @@ function CreateArtikel(props) {
   // State untuk form
   const [artikel, setArtikel] = createSignal(initialArtikel);
   const [jenisArtikelId, setJenisArtikelId] = createSignal(''); // STATE TERPISAH UNTUK SELECT
+  const [jenisArtikelProduk, setJenisArtikelProduk] = createSignal(''); // STATE TERPISAH UNTUK SELECT
   const [contentJSON, setContentJSON] = createSignal(null);
   const [contentHTML, setContentHTML] = createSignal("");
 
@@ -154,8 +155,12 @@ function CreateArtikel(props) {
                     </select>
                   }
                 >
+
                   <select
                     id="kategoriProduk"
+                    setJenisArtikelProduk
+                    value={jenisArtikelProduk()}
+                    onChange={(e) => setJenisArtikelProduk(e.target.value)}
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   >
                     <option value="" disabled selected>Pilih kategori produk</option>

@@ -39,6 +39,7 @@ function Artikel() {
     console.log('dataPanduan:', dataPanduan);
     console.log('dataProduk:', dataProduk);
   })
+
   const openModal = (type, item=null) => {
     setModals({ type, item, open:true });
   };
