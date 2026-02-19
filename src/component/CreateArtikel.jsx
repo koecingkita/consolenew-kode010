@@ -35,7 +35,7 @@ function CreateArtikel(props) {
   // State untuk form
   const [artikel, setArtikel] = createSignal(initialArtikel);
   const [jenisArtikelId, setJenisArtikelId] = createSignal(''); // STATE TERPISAH UNTUK SELECT
-  const [jenisArtikelProduk, setJenisArtikelProduk] = createSignal(''); // STATE TERPISAH UNTUK SELECT
+  const [jenisArtikelProduk, setJenisArtikelProduk] = createSignal(false); // STATE TERPISAH UNTUK SELECT
   const [contentJSON, setContentJSON] = createSignal(null);
   const [contentHTML, setContentHTML] = createSignal("");
 
@@ -71,21 +71,40 @@ function CreateArtikel(props) {
         metaArray.map(item => [item.label, item.value])
       ),
       content: tmpData.content?.value,
-      kategori: jenisArtikelId(),
+      kategori: jenisArtikelProduk() ? jenisArtikelProduk() : jenisArtikelId(),
+      ...(jenisArtikelProduk() ? {parent : jenisArtikelId()} : {}),
       author
     };
 
-    const gass = CREATE_ARTIKEL(dataObject);
+    CREATE_ARTIKEL(dataObject);
     return;
   };
 
   const handlePublish = () => {
     console.log("PUBLISH");
+
     const tmpData = {
-      ...initialArtikel,
-      initialBody: { ...initialBody, value: [contentJSON(), contentHTML()] }
+      ...artikel(),
+      content: { ...artikel().initialBody, value: [contentJSON(), contentHTML()]}
     };
+
+
+    const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
+
+    const dataObject = {
+      ...Object.fromEntries(
+        metaArray.map(item => [item.label, item.value])
+      ),
+      content: tmpData.content?.value,
+      kategori: jenisArtikelProduk() ? jenisArtikelProduk() : jenisArtikelId(),
+      ...(jenisArtikelProduk() ? {parent : jenisArtikelId()} : {}),
+      author
+    };
+
+    CREATE_ARTIKEL(dataObject);
+
     console.log('temporary Data: ', tmpData);
+    console.log('contentt: ', tmpData.content.value);
     return;
   };
 
