@@ -22,9 +22,25 @@ const initialModals = { type: null, item: null, open: false }
 function Artikel() {
   const [tab, setTab] = createSignal(0);
   const [modals, setModals] = createSignal(initialModals);
-  const [artikel] = createResource(ARTIKEL);
-  const [panduan] = createResource(PANDUAN);
-  const [produk] = createResource(PRODUK);
+
+  const [artikel] = createResource(async () => {
+    const result = await ARTIKEL();
+    return result;
+  });
+
+  const [panduan] = createResource(async () => {
+    const result = await PANDUAN();
+    return result;
+  });
+
+  const [produk] = createResource(async () => {
+    const result = await PRODUK();
+    return result;
+  });
+
+  const artikelList = () => artikel()?.data?.data ?? [];
+  const panduanList = () => panduan()?.data?.data ?? [];
+  const produkList = () => produk()?.data.data ?? [];
 
   createEffect(() => {
     const dataArtikel = artikel();
@@ -172,10 +188,12 @@ function Artikel() {
   ];
 
   const dataTab = [
-    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => artikel()?.data || [] },
-    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: () => produk()?.data || []},
-    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: () => panduan()?.data || []},
+    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => artikelList() },
+    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: () => produkList() },
+    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: () => panduanList() },
   ]
+
+  const currentTab = () => dataTab()[tab()];
 
   return (
     <>
@@ -284,7 +302,7 @@ function Artikel() {
         </div>
       </div>
 
-      <Show when={modals().open && modals().type==='delete'}>
+      <Show when={modals().open && modals().type === 'delete'}>
         <Delete
           item={modals().item}
           onClose={closeModal}
