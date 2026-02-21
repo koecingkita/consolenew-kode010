@@ -23,9 +23,8 @@ function Artikel() {
   const [tab, setTab] = createSignal(0);
   const [modals, setModals] = createSignal(initialModals);
 
-  const [artikel] = createResource(async () => {
-    const result = await ARTIKEL();
-    return result;
+  const [artikel, { refetch }] = createResource(async () => {
+    return await ARTIKEL();
   });
 
   const [panduan] = createResource(async () => {
@@ -306,6 +305,7 @@ function Artikel() {
         <Delete
           item={modals().item}
           onClose={closeModal}
+          onSuccess={refetch}
         />
       </Show>
 

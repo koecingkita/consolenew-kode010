@@ -10,12 +10,17 @@ import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { KategoriService } from './services/kategori.service';
 
-const initialModals = { type: null, item: null, open: false }
+const KATEGORI = KategoriService.get;
 
+const initialModals = { type: null, item: null, open: false }
 
 function Kategori() {
   const [modals, setModals] = createSignal(initialModals);
-  const [kategori] = createResource(KategoriService.get);
+  const [kategori] = createResource(async () => {
+    const result = await KATEGORI();
+    return result;
+  });
+
 
   createEffect(() => {
     const data = kategori();
@@ -129,7 +134,7 @@ function Kategori() {
               }
             >
               {(res) => (
-                <For each={res().data}>
+                <For each={res().data.data}>
                   {(item) => (
                     <tr class="hover:bg-gray-50 transition-colors">
                       <For each={headKategori}>

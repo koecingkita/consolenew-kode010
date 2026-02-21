@@ -18,9 +18,8 @@ export const ArtikelService = {
     api.post(ARTIKEL.create, data);
   },
 
-
   update: (id, data) => api.put(`/api/artikel/${id}`, data),
-  remove: (id) => api.delete(`/api/artikel/${id}`),
+  remove: (id) => api.delete(ARTIKEL.delete, {artikel: id}),
 
   Panduan: {
     get: (value = '') => {

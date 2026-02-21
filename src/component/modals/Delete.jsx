@@ -1,13 +1,26 @@
+// import { ARTIKEL_HAPUS } from "../services/artikel.service.js";
+import { ArtikelService } from "../services/artikel.service";
+const ARTIKEL_HAPUS = ArtikelService.remove;
+
 function Delete(props) {
   const handleClose = () => {
     props.onClose();
   };
 
-  const handleDelete = () => {
-    // Tambahkan logika delete di sini
-    console.log('Deleting:', props.item);
+  const handleDelete = async () => {
+    const res = await ARTIKEL_HAPUS(props.item.artikel);
+
+    console.log("DELETE RESPONSE:", res);
+
+    if (res.error) {
+      alert("Gagal menghapus artikel");
+      return;
+    }
+
+    props.onSuccess?.(); // 🔁 refetch
     props.onClose();
   };
+
 
   return (
     <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -64,4 +77,5 @@ function Delete(props) {
     </div>
   );
 }
+
 export default Delete;

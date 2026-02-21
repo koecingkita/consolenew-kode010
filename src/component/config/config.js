@@ -19,7 +19,7 @@ export const apiEndpoints = {
   artikel: {
     get: ARTIKEL+"/artikel/get",
     create: ARTIKEL+"/create/artikel",
-    delete: ARTIKEL+"/artikel/delete",
+    delete: ARTIKEL+"/delete/force/artikel",
     update: ARTIKEL+"/artikel/update",
     publish: ARTIKEL+"/artikel/publish",
     unpublish: ARTIKEL+"/artikel/unpublish",

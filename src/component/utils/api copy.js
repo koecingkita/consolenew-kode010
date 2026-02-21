@@ -3,10 +3,9 @@ async function apiFetch(path, options = {}) {
     data: null,
     error: null,
     loading: true
-  };
-
+  }
   try {
-    const res = await fetch(path, {
+    const res = await fetch(`${path}`, {
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
@@ -18,10 +17,7 @@ async function apiFetch(path, options = {}) {
       throw new Error(await res.text());
     }
 
-    // 🔥 SAFE JSON PARSE
-    const text = await res.text();
-    result.data = text ? JSON.parse(text) : null;
-
+    result.data = await res.json();
     result.loading = false;
     return result;
   } catch (e) {
@@ -29,6 +25,7 @@ async function apiFetch(path, options = {}) {
     result.loading = false;
     return result;
   }
+
 }
 
 export const api = {
