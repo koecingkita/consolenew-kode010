@@ -20,9 +20,10 @@ const TextRich = lazy(() => import("./component/TextRich"));
 const NotFound = lazy(() => import("./pages/notfound"));
 
 
+
 const App = () => {
   const isAuthenticated = 'admin';
-  const { role, author } = useAuth();
+  const { role } = useAuth();
 
   console.log("liat status: ", role);
 
@@ -39,7 +40,7 @@ const App = () => {
       { path: '/artikel', children: [
         { path: '/', component: Artikel },
         { path: '/create', component: CreateArtikel },
-        { path: '/update/:uuid', component: UpdateArtikel },
+        { path: '/update/:artikel', component: UpdateArtikel },
       ]},
       { path: '/Dashboard', component: Dashboard},
       { path: '/kategori', children: [

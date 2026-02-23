@@ -5,13 +5,17 @@ const ARTIKEL = apiEndpoints.artikel;
 const PANDUAN = apiEndpoints.panduan;
 const PRODUK = apiEndpoints.produk;
 
-
 export const ArtikelService = {
   get: (value = '') => {
     const path = !value ? ARTIKEL.get+value : ARTIKEL.get;
 
     return api.get(path);
   },
+  getDataUpdate: (value = '') => {
+    const path = ARTIKEL.update.get+'/'+value;
+    return api.get(path);
+  },
+
   detail: (id) => api.get(`/api/artikel/${id}`),
 
   create: (data) => {

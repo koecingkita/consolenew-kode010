@@ -2,7 +2,9 @@ import Container from "./theme/ui/ContainerContent";
 import TextRich from "./TextRich";
 import TagInput from "./TagInput";
 import { useLocation } from "@solidjs/router";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show, createResource } from "solid-js";
+import { ArtikelService } from "./services/artikel.service";
+
 
 const jenisArtikel = [
   { id: 1, label:'Artikel'},
@@ -10,13 +12,24 @@ const jenisArtikel = [
   { id: 3, label:'Panduan'}
 ]
 
+const CEKARTIKEL = ArtikelService.getDataUpdate;
+
 function UpdateArtikel(props) {
   const location = useLocation();
   const [artikel, setArtikel] = createSignal(0);
+  const uuidArtikel = location.pathname.split("/").pop();
+
+
+  const [cekArtikel] = createResource(async () => {
+    return await CEKARTIKEL(uuidArtikel);
+  })
 
   createEffect(() => {
     console.log("query:", location.pathname);
+    console.log("getUUIDArtikel:", uuidArtikel);
+    console.log("cekArtikel:", cekArtikel);
   })
+
 
   return (<Container>
 

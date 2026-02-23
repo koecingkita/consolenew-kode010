@@ -1,6 +1,6 @@
 import { AiOutlineSearch } from "solid-icons/ai";
 import { FaSolidAdd, FaSolidDownload } from "solid-icons/fa";
-import { BsSortDownAlt } from "solid-icons/bs";
+import { BsSortDownAlt, BsSortUpAlt } from "solid-icons/bs";
 import { BiRegularFilterAlt } from "solid-icons/bi";
 import { createSignal, createResource, For, Show, createEffect } from 'solid-js';
 import { listArtikel, listArtikelProduk, listArtikelPanduan } from './config/dataTable.js';
@@ -20,26 +20,56 @@ const PRODUK = ArtikelService.Produk.get;
 const initialModals = { type: null, item: null, open: false }
 
 function Artikel() {
+  const [search, setSearch] = createSignal("");
   const [tab, setTab] = createSignal(0);
+  const [sortDir, setSortDir] = createSignal("asc"); // asc | desc
   const [modals, setModals] = createSignal(initialModals);
 
-  const [artikel, { refetch }] = createResource(async () => {
+  const [artikel, { refetch: refetchArtikel }] = createResource(async () => {
     return await ARTIKEL();
   });
 
-  const [panduan] = createResource(async () => {
+  const [panduan, { refetch: refetchPanduan }] = createResource(async () => {
     const result = await PANDUAN();
     return result;
   });
 
-  const [produk] = createResource(async () => {
+  const [produk, { refetch: refetchProduk }] = createResource(async () => {
     const result = await PRODUK();
     return result;
   });
 
   const artikelList = () => artikel()?.data?.data ?? [];
   const panduanList = () => panduan()?.data?.data ?? [];
-  const produkList = () => produk()?.data.data ?? [];
+  const produkList = () => produk()?.data?.data ?? [];
+
+  const handleSuccessDelete = () => {
+    if (tab() === 0) refetchArtikel();
+    if (tab() === 1) refetchProduk();
+    if (tab() === 2) refetchPanduan();
+  };
+
+  const filterBySearch = (list) => {
+    const q = search().toLowerCase().trim();
+
+    let result = list;
+
+    // 🔍 FILTER by title
+    if (q) {
+      result = result.filter(item =>
+        item.title?.toLowerCase().includes(q)
+      );
+    }
+
+    // 🔃 SORT by ID
+    result = [...result].sort((a, b) => {
+      return sortDir() === "asc"
+        ? a.id - b.id       // kecil → besar
+        : b.id - a.id;      // besar → kecil
+    });
+
+    return result;
+  };
 
   createEffect(() => {
     const dataArtikel = artikel();
@@ -94,7 +124,7 @@ function Artikel() {
       render: (item) => (
         <div class="flex gap-2 text-md">
           <Tooltip text='Edit Artikel' position='bottom'>
-            <A href={`update/${item.slug}`}>
+            <A href={`update/${item.artikel}`}>
               <FaRegularEdit class="text-blue-700 cursor-pointer" />
             </A>
           </Tooltip>
@@ -138,10 +168,12 @@ function Artikel() {
     {
       key: "action",
       label: "Action",
-      render: () => (
+      render: (item) => (
         <div class="flex gap-2 text-md">
           <FaRegularEdit class="text-blue-700 cursor-pointer" />
-          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
+          <Tooltip text='Delete Artikel' position='bottom'>
+            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+          </Tooltip>
           <BsInfoLg class="cursor-pointer" />
         </div>
       ),
@@ -176,10 +208,12 @@ function Artikel() {
     {
       key: "action",
       label: "Action",
-      render: () => (
+      render: (item) => (
         <div class="flex gap-2 text-md">
           <FaRegularEdit class="text-blue-700 cursor-pointer" />
-          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" />
+          <Tooltip text='Delete Artikel' position='bottom'>
+            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+          </Tooltip>
           <BsInfoLg class="cursor-pointer" />
         </div>
       ),
@@ -187,9 +221,9 @@ function Artikel() {
   ];
 
   const dataTab = [
-    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => artikelList() },
-    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: () => produkList() },
-    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: () => panduanList() },
+    { id: 0, label: "Artikel Umum", dataHead: headArtikel, dataBody: () => filterBySearch(artikelList()) },
+    { id: 1, label: "Artikel Produk", dataHead:  headArtikelProduk, dataBody: () => filterBySearch(produkList()) },
+    { id: 2, label: "Artikel Panduan", dataHead: headPanduan, dataBody: () => filterBySearch(panduanList()) },
   ]
 
   const currentTab = () => dataTab()[tab()];
@@ -235,6 +269,8 @@ function Artikel() {
             <div class="relative">
               <input
                 type="text"
+                value={search()}
+                onInput={(e) => setSearch(e.currentTarget.value)}
                 placeholder={`Cari ${dataTab[tab()].label.toLowerCase()} ...`}
                 class="w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
               />
@@ -249,8 +285,12 @@ function Artikel() {
               <BiRegularFilterAlt /> Filter
             </button>
 
-            <button class="flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
-              <BsSortDownAlt /> Sort
+            <button
+              onClick={() => setSortDir(sortDir() === "asc" ? "desc" : "asc")}
+              class="flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+            >
+              {sortDir() === "asc" ? <BsSortUpAlt /> : <BsSortDownAlt />}
+              <span>{sortDir() === "asc" ? "Sort Terbaru" : "Sort Terlama"}</span>
             </button>
           </div>
         </div>
@@ -305,7 +345,7 @@ function Artikel() {
         <Delete
           item={modals().item}
           onClose={closeModal}
-          onSuccess={refetch}
+          onSuccess={handleSuccessDelete}
         />
       </Show>
 
