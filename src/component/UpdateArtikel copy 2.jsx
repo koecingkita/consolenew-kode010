@@ -2,7 +2,7 @@ import Container from "./theme/ui/ContainerContent";
 import TextRich from "./TextRich";
 import TagInput from "./TagInput";
 import { useLocation } from "@solidjs/router";
-import { createEffect, createSignal, For, Show, createResource } from "solid-js";
+import { createEffect, createSignal, For, Show, createResource, onMount } from "solid-js";
 import { ArtikelService } from "./services/artikel.service";
 
 const jenisArtikel = [
@@ -11,21 +11,7 @@ const jenisArtikel = [
   { id: 3, label: "Panduan" },
 ];
 
-const DEFAULT_CONTENT = { type: "doc", content: [{ type: "paragraph" }] };
-
-function parseContentBlocks(raw) {
-  if (!raw) return DEFAULT_CONTENT;
-  try {
-    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    // Validasi minimal struktur TipTap
-    if (parsed?.type === "doc" && Array.isArray(parsed?.content)) return parsed;
-    return DEFAULT_CONTENT;
-  } catch {
-    return DEFAULT_CONTENT;
-  }
-}
-
-function UpdateArtikel() {
+function UpdateArtikel(props) {
   const location = useLocation();
   const uuidArtikel = location.pathname.split("/").pop();
 
@@ -39,42 +25,82 @@ function UpdateArtikel() {
   const [metaDescription, setMetaDescription] = createSignal("");
   const [metaKeyword, setMetaKeyword] = createSignal("");
   const [tags, setTags] = createSignal([]);
-  const [kontenJSON, setKontenJSON] = createSignal(null); // null = belum siap / masih loading
+  const [kontenJSON, setKontenJSON] = createSignal(null);
   const [kontenHTML, setKontenHTML] = createSignal("");
   const [editorApi, setEditorApi] = createSignal(null);
 
-  // Fetch data
-  const [artikelData] = createResource(
+  // State untuk tracking apakah data sudah di-populate
+  const [isDataPopulated, setIsDataPopulated] = createSignal(false);
+
+  // Fetch data dengan createResource
+  const [artikelData, { refetch }] = createResource(
     () => uuidArtikel,
     async (uuid) => {
       if (!uuid) return null;
-      const response = await ArtikelService.getDataUpdate(uuid);
-      const result = response.data;
-      if (!result?.success) throw new Error(result?.message || "Artikel tidak ditemukan");
-      return result.data;
+
+      try {
+        console.log("Fetching data for UUID:", uuid);
+        const response = await ArtikelService.getDataUpdate(uuid);
+        const result = response.data;
+
+        if (!result || !result.success) {
+          throw new Error(result?.message || "Artikel tidak ditemukan");
+        }
+
+        console.log("Data fetched:", result.data);
+        return result.data;
+      } catch (error) {
+        console.error("Error fetching artikel:", error);
+        throw error;
+      }
     }
   );
 
-  // Populate form sekali saja saat data pertama kali tersedia
+  // Effect untuk populate data setelah fetch selesai
   createEffect(() => {
     const data = artikelData();
-    if (!data) return;
 
-    setArtikel(data.kategori || 0);
-    setJudul(data.title || "");
-    setGambar(data.image || "");
-    setKeteranganGambar(data.image_alt || "");
-    setMetaTitle(data.meta_title || "");
-    setMetaSlug(data.slug || "");
-    setMetaDescription(data.description || "");
-    setMetaKeyword(data.keyword || "");
-    setTags(data.tags || []);
+    // Hanya populate jika data ada dan belum di-populate
+    if (data && !isDataPopulated()) {
+      console.log("Populating form with data:", data);
 
-    // ✅ FIX: key yang benar adalah content_blocks
-    setKontenJSON(parseContentBlocks(data.content_blocks));
+      setArtikel(data.kategori || 0);
+      setJudul(data.title || "");
+      setGambar(data.image || "");
+      setKeteranganGambar(data.image_alt || "");
+      setMetaTitle(data.meta_title || "");
+      setMetaSlug(data.slug || "");
+      setMetaDescription(data.description || "");
+      setMetaKeyword(data.keyword || "");
+      setTags(data.tags || []);
+
+      // Parse konten
+      if (data.konten) {
+        try {
+          const parsed = typeof data.content_blocks === "string"
+            ? JSON.parse(data.content_blocks)
+            : data.content_blocks;
+          setKontenJSON(parsed);
+        } catch (e) {
+          console.error("Error parsing konten:", e);
+          setKontenJSON({ type: "doc", content: [{ type: "paragraph" }] });
+        }
+      } else {
+        setKontenJSON({ type: "doc", content: [{ type: "paragraph" }] });
+      }
+
+      // Tandai bahwa data sudah di-populate
+      setIsDataPopulated(true);
+    }
   });
 
-  const handleUpdate = async () => {
+  // Effect untuk reset populate state jika UUID berubah
+  createEffect(() => {
+    // Reset populate state ketika UUID berubah
+    setIsDataPopulated(false);
+  });
+
+  const handleUpdate = () => {
     const payload = {
       jenis_artikel_id: artikel(),
       judul: judul(),
@@ -85,30 +111,32 @@ function UpdateArtikel() {
       meta_description: metaDescription(),
       meta_keyword: metaKeyword(),
       tags: tags(),
-      content_blocks: kontenJSON(),
+      konten: kontenJSON(),
       konten_html: kontenHTML(),
     };
     console.log("Payload update:", payload);
-    // TODO: await ArtikelService.update(uuidArtikel, payload);
+    // TODO: ArtikelService.update(uuidArtikel, payload)
   };
 
   return (
     <Container>
-      {/* Loading */}
-      <Show when={artikelData.loading}>
+      {/* Loading State */}
+      <Show when={artikelData.loading && !artikelData()}>
         <div class="text-center p-8">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600" />
           <p class="mt-2 text-gray-600">Memuat data artikel...</p>
         </div>
       </Show>
 
-      {/* Error */}
+      {/* Error State */}
       <Show when={artikelData.error}>
         <div class="mx-6 my-10 flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
           <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-600">
             📄
           </div>
-          <h2 class="text-lg font-semibold text-gray-700">Artikel tidak ditemukan</h2>
+          <h2 class="text-lg font-semibold text-gray-700">
+            Artikel tidak ditemukan
+          </h2>
           <p class="text-sm text-gray-500">
             Artikel yang kamu cari tidak tersedia atau sudah dihapus.
           </p>
@@ -121,10 +149,9 @@ function UpdateArtikel() {
         </div>
       </Show>
 
-      {/* Form - tampil setelah data loaded */}
+      {/* Success State - Gunakan artikelData() untuk cek ketersediaan data */}
       <Show when={artikelData() && !artikelData.loading}>
         <div class="flex flex-col rounded-xl w-full max-w-6xl mx-auto">
-
           {/* Jenis Artikel */}
           <div class="flex flex-col gap-6 mx-6 mb-5">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
@@ -135,19 +162,21 @@ function UpdateArtikel() {
                 id="artikeljenis"
                 value={artikel()}
                 onChange={(e) => setArtikel(parseInt(e.target.value))}
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               >
                 <option disabled value={0}>Pilih jenis artikel</option>
                 <For each={jenisArtikel}>
                   {(item) => (
-                    <option value={item.id}>{item.label}</option>
+                    <option value={item.id} selected={artikel() === item.id}>
+                      {item.label}
+                    </option>
                   )}
                 </For>
               </select>
             </div>
           </div>
 
-          {/* Kategori Produk - hanya muncul kalau jenis = Produk */}
+          {/* Kategori Produk */}
           <Show when={artikel() === 2}>
             <div class="flex flex-col gap-6 mx-6 mb-5">
               <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
@@ -156,7 +185,7 @@ function UpdateArtikel() {
                 </label>
                 <select
                   id="kategori_produk"
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
                   <option disabled selected>Pilih kategori produk</option>
                   <option value="pulsa">Pulsa</option>
@@ -214,7 +243,7 @@ function UpdateArtikel() {
             </div>
           </div>
 
-          {/* Konten Editor — tunggu kontenJSON siap */}
+          {/* Konten Editor */}
           <Show
             when={kontenJSON() !== null}
             fallback={
@@ -331,7 +360,6 @@ function UpdateArtikel() {
               </div>
             </div>
           </div>
-
         </div>
       </Show>
     </Container>

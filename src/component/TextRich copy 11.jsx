@@ -154,7 +154,7 @@ export default function TextRich(props) {
       onUpdate: emitChange,
       editorProps: {
         attributes: {
-          class: "min-h-[300px] w-full p-4 outline-none prose max-w-none [&_p]:min-h-[1.5em]",
+          class: "min-h-[300px] w-full p-4 outline-none prose max-w-none",
         },
       },
     });

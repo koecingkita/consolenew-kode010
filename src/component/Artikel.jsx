@@ -170,11 +170,17 @@ function Artikel() {
       label: "Action",
       render: (item) => (
         <div class="flex gap-2 text-md">
-          <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          <Tooltip text='Edit Artikel' position='bottom'>
+            <A href={`update/${item.artikel}`}>
+              <FaRegularEdit class="text-blue-700 cursor-pointer" />
+            </A>
+          </Tooltip>
           <Tooltip text='Delete Artikel' position='bottom'>
             <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
           </Tooltip>
-          <BsInfoLg class="cursor-pointer" />
+          <Tooltip text='Detail Artikel' position='bottom'>
+            <BsInfoLg class="cursor-pointer" onClick={() => openModal('info', item)}/>
+          </Tooltip>
         </div>
       ),
     },
@@ -210,11 +216,17 @@ function Artikel() {
       label: "Action",
       render: (item) => (
         <div class="flex gap-2 text-md">
-          <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          <Tooltip text='Edit Artikel' position='bottom'>
+            <A href={`update/${item.artikel}`}>
+              <FaRegularEdit class="text-blue-700 cursor-pointer" />
+            </A>
+          </Tooltip>
           <Tooltip text='Delete Artikel' position='bottom'>
             <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
           </Tooltip>
-          <BsInfoLg class="cursor-pointer" />
+          <Tooltip text='Detail Artikel' position='bottom'>
+            <BsInfoLg class="cursor-pointer" onClick={() => openModal('info', item)}/>
+          </Tooltip>
         </div>
       ),
     },
