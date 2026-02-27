@@ -22,7 +22,7 @@ export const apiEndpoints = {
     delete: ARTIKEL+"/delete/force/artikel",
     update: {
       get: ARTIKEL + "/artikel/update/get",
-      update: ARTIKEL + "/artikel/update",
+      update: ARTIKEL + "/update/artikel",
     },
     publish: ARTIKEL+"/artikel/publish",
     unpublish: ARTIKEL+"/artikel/unpublish",

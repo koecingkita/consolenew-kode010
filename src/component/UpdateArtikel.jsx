@@ -4,6 +4,10 @@ import TagInput from "./TagInput";
 import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, For, Show, createResource } from "solid-js";
 import { ArtikelService } from "./services/artikel.service";
+import { KategoriService } from "./services/kategori.service.js";
+
+const GET_KATEGORI = KategoriService.get;
+const UPDATE = ArtikelService.update;
 
 const jenisArtikel = [
   { id: 1, label: "Artikel" },
@@ -31,6 +35,8 @@ function UpdateArtikel() {
 
   // Form signals
   const [artikel, setArtikel] = createSignal(0);
+  const [kategori, setKategori] = createSignal(0);
+  const [kategoriSub, setKategoriSub] = createSignal(0);
   const [judul, setJudul] = createSignal("");
   const [gambar, setGambar] = createSignal("");
   const [keteranganGambar, setKeteranganGambar] = createSignal("");
@@ -55,12 +61,22 @@ function UpdateArtikel() {
     }
   );
 
+  const [getKategori] = createResource(async () => {
+    const result = await GET_KATEGORI();
+    return result;
+  });
+
+  const kategoriList = () => getKategori()?.data?.data ?? [];
+
+
   // Populate form sekali saja saat data pertama kali tersedia
   createEffect(() => {
     const data = artikelData();
     if (!data) return;
 
-    setArtikel(data.kategori || 0);
+    setArtikel(data.uuid || 0);
+    setKategori(data.kategori || 0);
+    setKategoriSub(data.sub || 0);
     setJudul(data.title || "");
     setGambar(data.image || "");
     setKeteranganGambar(data.image_alt || "");
@@ -74,22 +90,32 @@ function UpdateArtikel() {
     setKontenJSON(parseContentBlocks(data.content_blocks));
   });
 
+
   const handleUpdate = async () => {
     const payload = {
-      jenis_artikel_id: artikel(),
-      judul: judul(),
-      gambar: gambar(),
-      keterangan_gambar: keteranganGambar(),
-      meta_title: metaTitle(),
-      slug: metaSlug(),
-      meta_description: metaDescription(),
-      meta_keyword: metaKeyword(),
-      tags: tags(),
-      content_blocks: kontenJSON(),
-      konten_html: kontenHTML(),
+      artikel: artikel(),
+      kategori: kategoriSub() || kategori(),
+      title: judul(),
+      contentImage: gambar(),
+      contentImageAlt: keteranganGambar(),
+      metaTitle: metaTitle(),
+      metaSlug: metaSlug(),
+      metaDescription: metaDescription(),
+      metaKeyword: metaKeyword(),
+      // tags: tags(),
+      content: [kontenJSON(), kontenHTML()], // [0] = blocks, [1] = html_body
     };
-    console.log("Payload update:", payload);
-    // TODO: await ArtikelService.update(uuidArtikel, payload);
+
+    try {
+      const response = await UPDATE(payload);
+      const result = response.data;
+      if (!result?.success) throw new Error(result?.message || "Gagal update artikel");
+      console.log("Artikel berhasil diupdate:", result);
+      // TODO: redirect atau tampilkan notifikasi sukses
+    } catch (err) {
+      console.error("Error update artikel:", err.message);
+      // TODO: tampilkan notifikasi error
+    }
   };
 
   return (
@@ -133,9 +159,10 @@ function UpdateArtikel() {
               </label>
               <select
                 id="artikeljenis"
-                value={artikel()}
+                value={kategori()}
+                disabled
                 onChange={(e) => setArtikel(parseInt(e.target.value))}
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                class="block w-full rounded-md bg-gray-200/80 px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200/80 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               >
                 <option disabled value={0}>Pilih jenis artikel</option>
                 <For each={jenisArtikel}>
@@ -148,22 +175,26 @@ function UpdateArtikel() {
           </div>
 
           {/* Kategori Produk - hanya muncul kalau jenis = Produk */}
-          <Show when={artikel() === 2}>
+          <Show when={kategori() === 2}>
             <div class="flex flex-col gap-6 mx-6 mb-5">
               <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
                 <label class="block mb-2.5 text-sm font-medium text-gray-700" for="kategori_produk">
                   Kategori Produk
                 </label>
-                <select
-                  id="kategori_produk"
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                >
-                  <option disabled selected>Pilih kategori produk</option>
-                  <option value="pulsa">Pulsa</option>
-                  <option value="paket internet">Paket Internet</option>
-                  <option value="ppob">PPOB</option>
-                  <option value="e wallet">E Wallet</option>
-                </select>
+                <Show when={!getKategori.loading} fallback={<p class="text-sm text-gray-400">Memuat Kategori</p>}>
+                  <select
+                    id="kategori_produk"
+                    value={kategoriSub()}
+                    onChange={(e) => setKategoriSub(parseInt(e.target.value))}
+                    class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  >
+                    <For each={kategoriList()}>
+                      {(item) => (
+                        <option value={item.id}>{item.label}</option>
+                      )}
+                    </For>
+                  </select>
+                </Show>
               </div>
             </div>
           </Show>

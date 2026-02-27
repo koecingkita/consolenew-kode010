@@ -44,6 +44,11 @@ export const api = {
     body: JSON.stringify(data),
   }),
 
+  patch: (path, data) => apiFetch(path, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  }),
+
   delete: (path, data) => apiFetch(path, {
     method: "DELETE",
     body: JSON.stringify(data)
