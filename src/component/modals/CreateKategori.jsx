@@ -1,4 +1,7 @@
 import { createSignal } from 'solid-js';
+import { KategoriService } from "../services/kategori.service.js";
+const CREATE = KategoriService.create;
+
 
 function CreateKategori(props) {
   const handleClose = () => {
@@ -28,6 +31,32 @@ function CreateKategori(props) {
     setSlug(e.target.value);
     setIsSlugAuto(false)
   }
+
+  const handleCreate = async () => {
+    try {
+      const payload = {
+        title: title(),
+        slug: slug(),
+        description: desc()
+      };
+
+      console.log('payyyload: ', payload);
+
+      CREATE(payload);
+
+      // reset form (optional)
+      setTitle("");
+      setSlug("");
+      setDesc("");
+      setIsSlugAuto(true);
+
+      // tutup modal
+      handleClose();
+
+    } catch (error) {
+      console.error("Gagal membuat kategori:", error);
+    }
+  };
 
   return (
   <div class='fixed inset-0 z-50 overflow-y-auto'>
@@ -60,7 +89,7 @@ function CreateKategori(props) {
 
         <div class='bg-gray-100 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 flex gap-1.5'>
           <button type='button'
-            onClick={handleClose}
+            onClick={handleCreate}
             class='hover:cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-inset ring-blue-700 hover:bg-blue-700 sm:mt-0 sm:w-auto'
           >Tambah</button>
           <button type='button'

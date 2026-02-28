@@ -44,7 +44,11 @@ export const apiEndpoints = {
     unpublish: ARTIKEL+"/panduan/unpublish",
   },
   kategori: {
-    get: ARTIKEL+"/kategori/get"
+    get: ARTIKEL + "/kategori/get",
+    create: ARTIKEL + "/create/category",
+    update: ARTIKEL + "/update/category",
+    delete: ARTIKEL + "/delete/category"
+
   },
   faq: {}, // get, create, delete, update
 };

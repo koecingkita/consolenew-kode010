@@ -254,7 +254,7 @@ function UpdateArtikel() {
                   <div class="px-6 pt-5 pb-3 border-b border-gray-100">
                     <label class="block text-sm font-medium text-gray-700">Konten Artikel</label>
                   </div>
-                  <div class="min-h-[400px] flex items-center justify-center text-gray-400 text-sm">
+                  <div class="min-h-100 flex items-center justify-center text-gray-400 text-sm">
                     <div class="flex flex-col items-center gap-2">
                       <div class="inline-block animate-spin rounded-full h-6 w-6 border-4 border-gray-200 border-t-blue-500" />
                       <span>Memuat editor...</span>
