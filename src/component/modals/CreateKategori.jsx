@@ -2,7 +2,6 @@ import { createSignal } from 'solid-js';
 import { KategoriService } from "../services/kategori.service.js";
 const CREATE = KategoriService.create;
 
-
 function CreateKategori(props) {
   const handleClose = () => {
     props.onClose();
@@ -37,7 +36,8 @@ function CreateKategori(props) {
       const payload = {
         title: title(),
         slug: slug(),
-        description: desc()
+        description: desc(),
+        parent: 'produk'
       };
 
       console.log('payyyload: ', payload);

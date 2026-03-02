@@ -11,5 +11,5 @@ export const KategoriService = {
   detail: (id) => api.get(`/api/artikel/${id}`),
   create: (data) => api.post(KATEGORI.create, data),
   update: (id, data) => api.put(`/api/artikel/${id}`, data),
-  remove: (id) => api.delete(`/api/artikel/${id}`),
+  delete: (id) => api.delete(KATEGORI.delete, id),
 };

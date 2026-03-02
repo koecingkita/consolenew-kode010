@@ -9,17 +9,29 @@ import { AiOutlineSearch } from "solid-icons/ai";
 import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { KategoriService } from './services/kategori.service';
+// import Delete from './modals/Delete.jsx';
+import Delete from './modals/Delete.jsx';
 
-const KATEGORI = KategoriService.get;
+
+const KATEGORI = KategoriService;
 
 const initialModals = { type: null, item: null, open: false }
 
 function Kategori() {
   const [modals, setModals] = createSignal(initialModals);
   const [kategori] = createResource(async () => {
-    const result = await KATEGORI();
+    const result = await KATEGORI.get();
     return result;
   });
+
+  const handleDelete = (id) => {
+    return KATEGORI.delete(id);
+  };
+
+  const handleSuccessDelete = () => {
+    closeModal();
+    kategori.refetch(); // biar reload data
+  };
 
 
   createEffect(() => {
@@ -75,7 +87,7 @@ function Kategori() {
         </div>
 
         <div>
-          <button onCLick={() => openModal('create') } class="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
+          <button onClick={() => openModal('create') } class="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
             <FaSolidAdd class="h-4 w-4" />
             Buat Kategori
           </button>
@@ -159,6 +171,14 @@ function Kategori() {
 
     <Show when={modals().open && modals().type === 'create'}>
       <CreateKategori item={modals().item} onClose={closeModal}/>
+    </Show>
+
+    <Show when={modals().open && modals().type === 'delete'}>
+      <Delete
+        item={modals().item}
+        onClose={closeModal}
+        onSuccess={handleSuccessDelete}
+      />
     </Show>
   </>)
 }
