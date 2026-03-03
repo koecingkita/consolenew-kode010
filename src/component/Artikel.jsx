@@ -355,8 +355,11 @@ function Artikel() {
 
       <Show when={modals().open && modals().type === 'delete'}>
         <Delete
-          item={modals().item}
+          isOpen={true}
           onClose={closeModal}
+          title="Artikel"
+          itemName={modals().item?.title}
+          onDelete={() => ArtikelService.remove(modals().item?.artikel)}
           onSuccess={handleSuccessDelete}
         />
       </Show>
