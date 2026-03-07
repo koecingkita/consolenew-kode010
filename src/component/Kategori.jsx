@@ -27,6 +27,8 @@ function Kategori() {
     return result.data.data; // langsung return array
   });
 
+
+
   createEffect(() => {
     if (kategori()) {
       console.log("kategori:", kategori());
@@ -156,7 +158,7 @@ function Kategori() {
 
       {/* CREATE MODAL */}
       <Show when={modals().open && modals().type === "create"}>
-        <CreateKategori onClose={closeModal} />
+        <CreateKategori onClose={closeModal} onSuccess={refetch} />
       </Show>
 
       {/* DELETE MODAL */}

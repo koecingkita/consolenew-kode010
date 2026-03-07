@@ -42,7 +42,7 @@ function CreateKategori(props) {
 
       console.log('payyyload: ', payload);
 
-      CREATE(payload);
+      await CREATE(payload);
 
       // reset form (optional)
       setTitle("");
@@ -50,6 +50,7 @@ function CreateKategori(props) {
       setDesc("");
       setIsSlugAuto(true);
 
+      await props.onSuccess?.();
       // tutup modal
       handleClose();
 
@@ -104,7 +105,3 @@ function CreateKategori(props) {
 }
 
 export default CreateKategori;
-
-/*
-mau bikin kondisi dimana ketika inputan judul di masukkan, maka otomatis inputan slug masuk, tapi ketika melakukan editan di inputan slug maka fungsi otomatisnya ga bekerja lagi
-*/
