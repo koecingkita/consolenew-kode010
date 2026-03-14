@@ -1,5 +1,5 @@
 import { FaSolidAdd } from 'solid-icons/fa';
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, For, Show, createResource, createEffect } from 'solid-js';
 import CreateTag from './modals/CreateTag';
 import { listTag } from './config/dataTable.js';
 import { FaRegularEdit } from 'solid-icons/fa'
@@ -8,12 +8,23 @@ import Tooltip from "./theme/ui/Tooltip.jsx";
 import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { AiOutlineSearch } from "solid-icons/ai";
-
+import { TagService } from './services/tag.service';
 
 const initialModals = { type:null, item:null, open:false }
 
 function Tag() {
   const [modals, setModals] = createSignal(initialModals);
+
+  const [tag, { refetch }] = createResource(async () => {
+    const result = await TagService.get();
+    return result.data.data;
+  })
+
+  createEffect(() => {
+    if (tag()) {
+      console.log("tag: ", tag());
+    }
+  })
 
   const openModal = (type, item=null) => {
     setModals({ type, item, open:true });
@@ -39,8 +50,8 @@ function Tag() {
         {item.id}
       </td>
     )},
-    {key:'name', label:'Label'},
-    {key:'slug', label:'Slug'},
+    {key:'label', label:'Label'},
+    {key:'description', label:'Slug'},
     {
       key: 'status', label: 'Status',
       render: (item) => (
@@ -121,7 +132,7 @@ function Tag() {
             </For>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <For each={listTag}>
+            <For each={tag()}>
               {(item) => (
                 <tr class="hover:bg-gray-50 transition-colors">
                   <For each={headTag}>
@@ -140,7 +151,7 @@ function Tag() {
     </div>
 
     <Show when={modals().open && modals().type === 'create'}>
-      <CreateTag item={modals().item} onClose={closeModal}/>
+      <CreateTag item={modals().item} onClose={closeModal} onSuccess={refetch} />
     </Show>
   </>)
 }

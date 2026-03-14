@@ -1,18 +1,9 @@
 import { FaSolidAdd } from "solid-icons/fa";
-import {
-  createSignal,
-  createResource,
-  For,
-  Show,
-  createEffect,
-} from "solid-js";
+import { createSignal, createResource, For, Show, createEffect } from "solid-js";
 import CreateKategori from "./modals/CreateKategori";
 import Tooltip from "./theme/ui/Tooltip.jsx";
 import { FaRegularEdit } from "solid-icons/fa";
 import { RiSystemDeleteBinLine } from "solid-icons/ri";
-import { AiOutlineSearch } from "solid-icons/ai";
-import { BiRegularFilterAlt } from "solid-icons/bi";
-import { BsSortDownAlt } from "solid-icons/bs";
 import { KategoriService } from "./services/kategori.service";
 import Delete from "./modals/Delete.jsx";
 

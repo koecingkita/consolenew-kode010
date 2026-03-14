@@ -50,5 +50,17 @@ export const apiEndpoints = {
     delete: ARTIKEL + "/delete/category"
 
   },
-  faq: {}, // get, create, delete, update
+  faq: {
+    get: ARTIKEL + "/faq/get",
+    create: ARTIKEL + "/create/faq",
+    update: ARTIKEL + "/update/faq",
+    delete: ARTIKEL + "/delete/faq"
+  }, // get, create, delete, update
+  tag: {
+    get: ARTIKEL + "/tag/get",
+    cek: ARTIKEL + "/tag/cek",
+    create: ARTIKEL + "/create/tag",
+    update: ARTIKEL + "/update/tag",
+    delete: ARTIKEL + "/delete/tag"
+  }
 };
