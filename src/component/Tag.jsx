@@ -9,6 +9,7 @@ import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { AiOutlineSearch } from "solid-icons/ai";
 import { TagService } from './services/tag.service';
+import Delete from "./modals/Delete.jsx";
 
 const initialModals = { type:null, item:null, open:false }
 
@@ -152,6 +153,17 @@ function Tag() {
 
     <Show when={modals().open && modals().type === 'create'}>
       <CreateTag item={modals().item} onClose={closeModal} onSuccess={refetch} />
+    </Show>
+
+    <Show when={modals().open && modals().type === "delete"}>
+      <Delete
+        isOpen={true}
+        onClose={closeModal}
+        title="Tag"
+        itemName={modals().item?.label}
+        onDelete={() => TagService.delete({ tag: modals().item?.id })}
+        onSuccess={refetch}
+      />
     </Show>
   </>)
 }

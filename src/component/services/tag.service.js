@@ -5,7 +5,7 @@ const TAG = apiEndpoints.tag;
 
 export const TagService = {
   get: (value = '') => {
-    const path = !value ? TAG.get+value : TAG.get;
+    const path = value ? TAG.get+value : TAG.get;
     return api.get(path);
   },
   detail: (id) => api.get(`/api/artikel/${id}`),

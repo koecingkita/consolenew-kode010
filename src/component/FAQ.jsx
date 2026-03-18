@@ -1,5 +1,5 @@
 import { FaSolidAdd } from 'solid-icons/fa';
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, For, Show, createResource, createEffect } from 'solid-js';
 import CreateFAQ from './modals/CreateFAQ';
 import { listFAQ } from './config/dataTable.js';
 import Tooltip from "./theme/ui/Tooltip.jsx";
@@ -8,12 +8,23 @@ import { RiSystemDeleteBinLine } from 'solid-icons/ri'
 import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { AiOutlineSearch } from "solid-icons/ai";
-
+import { FAQService } from './services/faq.service';
 
 const initialModals = { type:null, item:null, open:false}
 
 function FAQ() {
   const [modals, setModals] = createSignal(initialModals);
+
+  const [faq, { refetch }] = createResource(async () => {
+    const result = await FAQService.get();
+    return result.data.data;
+  })
+
+  createEffect(() => {
+    if (tag()) {
+      console.log("tag: ", tag());
+    }
+  })
 
   const openModal = (type, item=null) => {
     setModals({ type, item, open:true });
@@ -39,40 +50,30 @@ function FAQ() {
       </td>
     )},
     {key:'question', label:'Pertanyaan'},
-    {key:'answer', label:'Jawaban'},
     {
-      key: 'status', label: 'Status',
-      render: (item) => (
-        <span
-          class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-        </span>
-      )},
-      {key:'action', label:'Action', render: (item)=>(
-        <div class="flex gap-2 text-md">
-          <Tooltip text='Edit FAQ' position='bottom'>
-            {/* <A href={`update/${item.slug}`}>*/}
-              <FaRegularEdit class="text-blue-700 cursor-pointer" />
-            {/* </A>*/}
-          </Tooltip>
+      key: 'answer', label: 'Jawaban', render: (item) => (
+      item?.answer?.length > 20 ? item.answer.slice(0, 50) + ' ...' : item.answer
+    )},
+    {key:'action', label:'Action', render: (item)=>(
+      <div class="flex gap-2 text-md">
+        <Tooltip text='Edit FAQ' position='bottom'>
+          {/* <A href={`update/${item.slug}`}>*/}
+            <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          {/* </A>*/}
+        </Tooltip>
 
-          <Tooltip text='Delete FAQ' position='bottom'>
-            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
-          </Tooltip>
-        </div>
-      )}
+        <Tooltip text='Delete FAQ' position='bottom'>
+          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+        </Tooltip>
+      </div>)
+    }
   ]
 
-  return (<>
-    <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
-      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 class="text-xl font-semibold">Frequently Asked Questions</h1>
+return (<>
+  <div class="mb-8 rounded-2xl p-6 text-gray-700 shadow-sm border border-gray-200  bg-white">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-xl font-semibold">Frequently Asked Questions</h1>
           <p class="text-sm text-gray-600">
             Tambah dan kelola pertanyaan umum untuk membantu pengguna
           </p>
@@ -121,7 +122,7 @@ function FAQ() {
             </For>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <For each={listFAQ}>
+            <For each={faq()}>
               {(item) => (
                 <tr class="hover:bg-gray-50 transition-colors">
                   <For each={headFAQ}>
@@ -140,7 +141,7 @@ function FAQ() {
     </div>
 
     <Show when={modals().open && modals().type === 'create'}>
-      <CreateFAQ item={modals().item} onClose={closeModal}/>
+    <CreateFAQ item={modals().item} onClose={closeModal} onSuccess={refetch} />
     </Show>
   </>)
 }

@@ -5,7 +5,7 @@ const KATEGORI = apiEndpoints.kategori;
 
 export const KategoriService = {
   get: (value = '') => {
-    const path = !value ? KATEGORI.get+value : KATEGORI.get;
+    const path = value ? KATEGORI.get+value : KATEGORI.get;
     return api.get(path);
   },
   detail: (id) => api.get(`/api/artikel/${id}`),

@@ -1,4 +1,6 @@
 import { createSignal } from 'solid-js';
+import { FAQService } from '../services/faq.service.js';
+const CREATE = FAQService.create;
 
 function CreateFAQ(props) {
   const handleClose = () => {
@@ -7,6 +9,31 @@ function CreateFAQ(props) {
 
   const [quest, setQuest] = createSignal('');
   const [answer, setAnswer] = createSignal('');
+
+  const handleChange = (setter) => {
+    return (e) => {
+      setter(e.target.value)
+    }
+  }
+
+  const handleCreate = async () => {
+    try {
+      const payload = {
+        question: quest(),
+        answer: answer()
+      }
+
+      const result = await CREATE(payload);
+
+      setQuest('');
+      setAnswer('');
+      console.log('result:', result);
+      await props.onSuccess?.();
+      handleClose();
+    } catch (e) {
+      console.log('Gagal membuat faq:', e)
+    }
+  }
 
   return (<div class='fixed inset-0 z-50 overflow-y-auto'>
     <div class='fixed inset-0 bg-black/30 transition-opacity' onClick={handleClose}></div>
@@ -24,15 +51,19 @@ function CreateFAQ(props) {
         <div class="sm:px-6 sm:pb-6 flex flex-col gap-4">
             <div class='flex flex-col gap-1 '>
               <label class='text-sm'>Title</label>
-              <input type='text' value={quest()}  placeholder='Apa itu Adaku ?' class='block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"'/>
+              <input type='text' value={quest()} onInput={handleChange(setQuest)} placeholder='Apa itu Adaku ?' class='block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"'/>
             </div>
             <div class='flex flex-col gap-1'>
               <label class='text-sm'>Deskripsi</label>
-              <textarea rows='6' type='text' value={answer()} placeholder='Adaku adalah ...' class='resize-none text-sm block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"'/>
+              <textarea rows='6' type='text' value={answer()} onInput={handleChange(setAnswer)} placeholder='Adaku adalah ...' class='resize-none text-sm block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"'/>
             </div>
         </div>
 
         <div class='bg-gray-100 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 flex gap-1.5'>
+          <button type='button'
+            onClick={handleCreate}
+            class='hover:cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-inset ring-blue-700 hover:bg-blue-700 sm:mt-0 sm:w-auto'
+          >Tambah</button>
           <button type='button'
             onClick={handleClose}
             class='hover:cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'

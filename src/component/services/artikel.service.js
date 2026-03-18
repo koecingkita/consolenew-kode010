@@ -7,7 +7,7 @@ const PRODUK = apiEndpoints.produk;
 
 export const ArtikelService = {
   get: (value = '') => {
-    const path = !value ? ARTIKEL.get+value : ARTIKEL.get;
+    const path = value ? ARTIKEL.get+value : ARTIKEL.get;
 
     return api.get(path);
   },
