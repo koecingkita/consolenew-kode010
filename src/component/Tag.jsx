@@ -53,32 +53,19 @@ function Tag() {
     )},
     {key:'label', label:'Label'},
     {key:'description', label:'Slug'},
-    {
-      key: 'status', label: 'Status',
-      render: (item) => (
-        <span
-          class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-        </span>
-      )},
-      {key:'action', label:'Action', render: (item)=>(
-        <div class="flex gap-2 text-md">
-          <Tooltip text='Edit Tag' position='bottom'>
-            {/* <A href={`update/${item.slug}`}>*/}
-              <FaRegularEdit class="text-blue-700 cursor-pointer" />
-            {/* </A>*/}
-          </Tooltip>
+    {key:'action', label:'Action', render: (item)=>(
+      <div class="flex gap-2 text-md">
+        <Tooltip text='Edit Tag' position='bottom'>
+          {/* <A href={`update/${item.slug}`}>*/}
+            <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          {/* </A>*/}
+        </Tooltip>
 
-          <Tooltip text='Delete Tag' position='bottom'>
-            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
-          </Tooltip>
-        </div>
-      )}
+        <Tooltip text='Delete Tag' position='bottom'>
+          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+        </Tooltip>
+      </div>
+    )}
   ]
 
   return (<>

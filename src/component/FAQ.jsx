@@ -9,6 +9,7 @@ import { BiRegularFilterAlt } from "solid-icons/bi";
 import { BsSortDownAlt } from "solid-icons/bs";
 import { AiOutlineSearch } from "solid-icons/ai";
 import { FAQService } from './services/faq.service';
+import Delete from "./modals/Delete.jsx";
 
 const initialModals = { type:null, item:null, open:false}
 
@@ -141,8 +142,20 @@ return (<>
     </div>
 
     <Show when={modals().open && modals().type === 'create'}>
-    <CreateFAQ item={modals().item} onClose={closeModal} onSuccess={refetch} />
+      <CreateFAQ item={modals().item} onClose={closeModal} onSuccess={refetch} />
     </Show>
+
+    <Show when={modals().open && modals().type === "delete"}>
+      <Delete
+        isOpen={true}
+        onClose={closeModal}
+        title="Tag"
+        itemName={modals().item?.question}
+        onDelete={() => FAQService.delete({ layananFAQ: modals().item?.id })}
+        onSuccess={refetch}
+      />
+    </Show>
+
   </>)
 }
 
