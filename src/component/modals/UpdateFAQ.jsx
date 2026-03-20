@@ -36,7 +36,7 @@ function UpdateFAQ(props) {
       handleClose();
     } catch (e) {
       console.log('Gagal update faq:', e)
-    }
+    } // tambah comment
   }
 
   return (<div class='fixed inset-0 z-50 overflow-y-auto'>
