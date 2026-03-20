@@ -10,6 +10,6 @@ export const FAQService = {
   },
   detail: (id) => api.get(`/api/artikel/${id}`),
   create: (data) => api.post(FAQ.create, data),
-  update: (id, data) => api.put(`/api/artikel/${id}`, data),
+  update: (data) => api.patch(FAQ.update, data),
   delete: (id) => api.delete(FAQ.delete, id),
 };

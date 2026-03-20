@@ -1,6 +1,7 @@
 import { FaSolidAdd } from 'solid-icons/fa';
 import { createSignal, For, Show, createResource, createEffect } from 'solid-js';
 import CreateFAQ from './modals/CreateFAQ';
+import UpdateFAQ from './modals/UpdateFAQ';
 import { listFAQ } from './config/dataTable.js';
 import Tooltip from "./theme/ui/Tooltip.jsx";
 import { FaRegularEdit } from 'solid-icons/fa'
@@ -11,7 +12,7 @@ import { AiOutlineSearch } from "solid-icons/ai";
 import { FAQService } from './services/faq.service';
 import Delete from "./modals/Delete.jsx";
 
-const initialModals = { type:null, item:null, open:false}
+const initialModals = { type:null, item:null, open:false }
 
 function FAQ() {
   const [modals, setModals] = createSignal(initialModals);
@@ -59,7 +60,7 @@ function FAQ() {
       <div class="flex gap-2 text-md">
         <Tooltip text='Edit FAQ' position='bottom'>
           {/* <A href={`update/${item.slug}`}>*/}
-            <FaRegularEdit class="text-blue-700 cursor-pointer" />
+          <FaRegularEdit class="text-blue-700 cursor-pointer" onClick={() => openModal('update', item)} />
           {/* </A>*/}
         </Tooltip>
 
@@ -154,7 +155,18 @@ return (<>
         onDelete={() => FAQService.delete({ layananFAQ: modals().item?.id })}
         onSuccess={refetch}
       />
+  </Show>
+
+    <Show when={modals().open && modals().type === "update"}>
+      <UpdateFAQ
+        isOpen={true}
+        onClose={closeModal}
+        title="FAQ"
+        itemName={modals().item}
+        onSuccess={refetch}
+      />
     </Show>
+
   </>)
 }
 

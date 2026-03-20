@@ -1,6 +1,7 @@
 import { FaSolidAdd } from 'solid-icons/fa';
 import { createSignal, For, Show, createResource, createEffect } from 'solid-js';
 import CreateTag from './modals/CreateTag';
+import UpdateTag from './modals/UpdateTag';
 import { listTag } from './config/dataTable.js';
 import { FaRegularEdit } from 'solid-icons/fa'
 import { RiSystemDeleteBinLine } from 'solid-icons/ri'
@@ -52,33 +53,20 @@ function Tag() {
       </td>
     )},
     {key:'label', label:'Label'},
-    {key:'description', label:'Slug'},
-    {
-      key: 'status', label: 'Status',
-      render: (item) => (
-        <span
-          class={`px-3 py-1 text-xs rounded-full ${
-            item.status === "1"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {item.status === "1" ? "Aktif" : "Tidak Aktif"}
-        </span>
-      )},
-      {key:'action', label:'Action', render: (item)=>(
-        <div class="flex gap-2 text-md">
-          <Tooltip text='Edit Tag' position='bottom'>
-            {/* <A href={`update/${item.slug}`}>*/}
-              <FaRegularEdit class="text-blue-700 cursor-pointer" />
-            {/* </A>*/}
-          </Tooltip>
+    {key:'description', label:'Deskripsi'},
+    {key:'action', label:'Action', render: (item)=>(
+      <div class="flex gap-2 text-md">
+        <Tooltip text='Edit Tag' position='bottom'>
+          {/* <A href={`update/${item.slug}`}>*/}
+            <FaRegularEdit class="text-blue-700 cursor-pointer" onClick={() => openModal('update', item)} />
+          {/* </A>*/}
+        </Tooltip>
 
-          <Tooltip text='Delete Tag' position='bottom'>
-            <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
-          </Tooltip>
-        </div>
-      )}
+        <Tooltip text='Delete Tag' position='bottom'>
+          <RiSystemDeleteBinLine class="text-red-700 cursor-pointer" onClick={() => openModal('delete', item)}/>
+        </Tooltip>
+      </div>
+    )}
   ]
 
   return (<>
@@ -162,6 +150,16 @@ function Tag() {
         title="Tag"
         itemName={modals().item?.label}
         onDelete={() => TagService.delete({ tag: modals().item?.id })}
+        onSuccess={refetch}
+      />
+    </Show>
+
+    <Show when={modals().open && modals().type === "update"}>
+      <UpdateTag
+        isOpen={true}
+        onClose={closeModal}
+        title="Tag"
+        itemName={modals().item}
         onSuccess={refetch}
       />
     </Show>

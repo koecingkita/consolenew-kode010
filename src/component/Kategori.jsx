@@ -1,11 +1,13 @@
 import { FaSolidAdd } from "solid-icons/fa";
 import { createSignal, createResource, For, Show, createEffect } from "solid-js";
 import CreateKategori from "./modals/CreateKategori";
+import UpdateKategori from "./modals/UpdateKategori";
 import Tooltip from "./theme/ui/Tooltip.jsx";
 import { FaRegularEdit } from "solid-icons/fa";
 import { RiSystemDeleteBinLine } from "solid-icons/ri";
 import { KategoriService } from "./services/kategori.service";
 import Delete from "./modals/Delete.jsx";
+
 
 const initialModals = { type: null, item: null, open: false };
 
@@ -52,7 +54,7 @@ function Kategori() {
       render: (item) => (
         <div class="flex gap-2 text-md">
           <Tooltip text="Edit Kategori" position="bottom">
-            <FaRegularEdit class="text-blue-700 cursor-pointer" />
+            <FaRegularEdit class="text-blue-700 cursor-pointer" onClick={() => openModal('update', item)}  />
           </Tooltip>
 
           <Tooltip text="Delete Kategori" position="bottom">
@@ -160,6 +162,16 @@ function Kategori() {
           title="Kategori"
           itemName={modals().item?.label}
           onDelete={() => KategoriService.delete({ kategori: modals().item?.id })}
+          onSuccess={refetch}
+        />
+      </Show>
+
+      <Show when={modals().open && modals().type === "update"}>
+        <UpdateKategori
+          isOpen={true}
+          onClose={closeModal}
+          title="Kategori"
+          itemName={modals().item}
           onSuccess={refetch}
         />
       </Show>

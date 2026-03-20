@@ -10,6 +10,6 @@ export const TagService = {
   },
   detail: (id) => api.get(`/api/artikel/${id}`),
   create: (data) => api.post(TAG.create, data),
-  update: (id, data) => api.put(`/api/artikel/${id}`, data),
+  update: (data) => api.patch(TAG.update, data),
   delete: (id) => api.delete(TAG.delete, id),
 };
