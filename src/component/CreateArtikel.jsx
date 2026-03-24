@@ -6,6 +6,7 @@ import { createEffect, createSignal, For, Show, createResource } from "solid-js"
 import { ArtikelService } from "./services/artikel.service.js";
 import { KategoriService } from "./services/kategori.service.js";
 import { useAuth } from "./context/AuthContext";
+import { TagService } from './services/tag.service';
 
 const CREATE_ARTIKEL = ArtikelService.create;
 const GET_KATEGORI = KategoriService.get;
@@ -38,6 +39,15 @@ function CreateArtikel(props) {
   const [jenisArtikelProduk, setJenisArtikelProduk] = createSignal(false); // STATE TERPISAH UNTUK SELECT
   const [contentJSON, setContentJSON] = createSignal(null);
   const [contentHTML, setContentHTML] = createSignal("");
+  const [tagData, setTagData] = createSignal("");
+
+  const [tag, { refetch }] = createResource(async () => {
+    const result = await TagService.get();
+    return result.data.data;
+  })
+
+  console.log("taggini mah: ", tag());
+  console.log("taggini mahgggggggggggggggggggggggggggggggggg: ", tagData());
 
   // Resource untuk kategori
   const [kategori] = createResource(async () => {
@@ -54,14 +64,18 @@ function CreateArtikel(props) {
     console.log("Kategori loading:", kategori.loading);
     console.log("Kategori data:", kategori());
     console.log("Kategori latest:", kategori.latest);
+    console.log("tag latest: ggggggggggggggggggggggggggggggggggggggggggzzzzzzzzzzzzzzs", tagData());
   });
 
   const handleSave = () => {
     console.log("SAVE");
 
+
+
     const tmpData = {
       ...artikel(),
-      content: { ...artikel().initialBody, value: contentJSON() }
+      content: { ...artikel().initialBody, value: contentJSON() },
+      tagList
     };
 
     const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
@@ -85,9 +99,13 @@ function CreateArtikel(props) {
 
     const tmpData = {
       ...artikel(),
-      content: { ...artikel().initialBody, value: [contentJSON(), contentHTML()]}
+      content: { ...artikel().initialBody, value: [contentJSON(), contentHTML()] },
+      tagList: tagData()
     };
 
+
+    const tagList = tagData().map(item => item.id).join(',');
+    console.log("tag latest: list :::: ", tagList);
 
     const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
 
@@ -305,7 +323,7 @@ function CreateArtikel(props) {
             <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">
               Meta Tag
             </label>
-            <TagInput />
+            <TagInput tag={tag()} onTagsChange={setTagData} /> {/* kirim tag() ke component ini terus disimpan di tagData()*/}
           </div>
         </div>
       </div>

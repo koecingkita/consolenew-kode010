@@ -15,10 +15,18 @@ const listTag = [
   { id: 10, label: "label sepuluh" },
 ];
 
-export default function TagInput() {
-  const [tags, setTags] = createSignal([]);
+export default function TagInput(props) {
+  // Perbaiki: props.tags sebagai initial value, bukan props.tag()
+  const [tags, setTags] = createSignal(props.tags || []);
   const [input, setInput] = createSignal("");
   const [open, setOpen] = createSignal(false);
+
+  // Perbaiki: fungsi untuk notify parent
+  const notifyParent = (newTags) => {
+    if (props.onTagsChange) {
+      props.onTagsChange(newTags);
+    }
+  };
 
   const isMax = () => tags().length >= MAX_TAG;
 
@@ -31,13 +39,17 @@ export default function TagInput() {
 
   const addTag = (tag) => {
     if (isMax()) return;
-    setTags([...tags(), tag]);
+    const newTags = [...tags(), tag];
+    setTags(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
     setInput("");
     setOpen(false);
   };
 
   const removeTag = (id) => {
-    setTags(tags().filter((t) => t.id !== id));
+    const newTags = tags().filter((t) => t.id !== id);
+    setTags(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
   };
 
   return (
@@ -73,6 +85,10 @@ export default function TagInput() {
             setOpen(true);
           }}
           onFocus={() => !isMax() && setOpen(true)}
+          onBlur={() => {
+            // Delay close to allow click on dropdown items
+            setTimeout(() => setOpen(false), 200);
+          }}
           placeholder={isMax() ? "Maksimal 6 tag" : "Cari tag..."}
           class="flex-1 min-w-[120px] border-none p-1 text-sm outline-none disabled:cursor-not-allowed disabled:bg-transparent"
         />
@@ -86,13 +102,13 @@ export default function TagInput() {
       </Show>
 
       {/* Dropdown */}
-      <Show when={!isMax() && open() && filteredTags().length}>
-        <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow">
+      <Show when={!isMax() && open() && filteredTags().length > 0}>
+        <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
           <For each={filteredTags()}>
             {(item) => (
               <li
                 onClick={() => addTag(item)}
-                class="cursor-pointer px-3 py-2 text-sm hover:bg-blue-50"
+                class="cursor-pointer px-3 py-2 text-sm hover:bg-blue-50 transition-colors"
               >
                 {item.label}
               </li>
