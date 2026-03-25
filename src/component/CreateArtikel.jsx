@@ -27,7 +27,6 @@ function CreateArtikel(props) {
     { label: 'metaSlug', value: '' },
     { label: 'metaDescription', value: '' },
     { label: 'metaKeyword', value: '' },
-    { label: 'metaTag', value: 'ssss' },
   ];
 
   const initialBody = { label: 'content', value: '' };
@@ -116,7 +115,8 @@ function CreateArtikel(props) {
       content: tmpData.content?.value,
       kategori: jenisArtikelProduk() ? jenisArtikelProduk() : jenisArtikelId(),
       ...(jenisArtikelProduk() ? {parent : jenisArtikelId()} : {}),
-      author
+      author,
+      metaTag: tagList
     };
 
     CREATE_ARTIKEL(dataObject);
