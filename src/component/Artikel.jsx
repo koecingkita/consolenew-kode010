@@ -12,6 +12,8 @@ import Tooltip from "./theme/ui/Tooltip.jsx";
 import Delete from './modals/Delete.jsx'
 import Info from './modals/Info.jsx'
 import { ArtikelService } from "./services/artikel.service.js";
+import { TagService } from './services/tag.service';
+
 
 const ARTIKEL = ArtikelService.get;
 const PANDUAN = ArtikelService.Panduan.get;

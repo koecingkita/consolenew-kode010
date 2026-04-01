@@ -5,9 +5,12 @@ import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, For, Show, createResource } from "solid-js";
 import { ArtikelService } from "./services/artikel.service";
 import { KategoriService } from "./services/kategori.service.js";
+import { TagService } from './services/tag.service';
 
 const GET_KATEGORI = KategoriService.get;
 const UPDATE = ArtikelService.update;
+const TAG = TagService.cek;
+
 
 const jenisArtikel = [
   { id: 1, label: "Artikel" },
@@ -61,6 +64,14 @@ function UpdateArtikel() {
     }
   );
 
+  const [getTag] = createResource(async () => {
+    const result = await TAG(uuidArtikel);
+    return result;
+  });
+
+  createEffect(() => {
+    console.log("taggg::==>", getTag());
+  })
   const [getKategori] = createResource(async () => {
     const result = await GET_KATEGORI();
     return result;
