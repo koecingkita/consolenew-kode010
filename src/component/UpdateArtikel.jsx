@@ -11,7 +11,6 @@ const GET_KATEGORI = KategoriService.get;
 const UPDATE = ArtikelService.update;
 const TAG = TagService.cek;
 
-
 const jenisArtikel = [
   { id: 1, label: "Artikel" },
   { id: 2, label: "Produk" },
@@ -69,20 +68,19 @@ function UpdateArtikel() {
     return result;
   });
 
-  createEffect(() => {
-    console.log("taggg::==>", getTag());
-  })
   const [getKategori] = createResource(async () => {
     const result = await GET_KATEGORI();
     return result;
   });
 
   const kategoriList = () => getKategori()?.data?.data ?? [];
-
+  const tagList = () => getTag()?.data?.data ?? [];
 
   // Populate form sekali saja saat data pertama kali tersedia
   createEffect(() => {
     const data = artikelData();
+    const newTagList = tagList();
+
     if (!data) return;
 
     setArtikel(data.uuid || 0);
@@ -96,8 +94,8 @@ function UpdateArtikel() {
     setMetaDescription(data.description || "");
     setMetaKeyword(data.keyword || "");
     setTags(data.tags || []);
+    setTags(newTagList.tagList || []);
 
-    // ✅ FIX: key yang benar adalah content_blocks
     setKontenJSON(parseContentBlocks(data.content_blocks));
   });
 
@@ -344,9 +342,15 @@ function UpdateArtikel() {
                 <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_tag">
                   Meta Tag
                 </label>
+
                 <TagInput
-                  initialTags={tags()}
+                  initialTags={() => tags()}
                   onChange={(newTags) => setTags(newTags)}
+                  onTagsChange={(newTags) => {
+                    console.log('Tags changed:', newTags);
+                    setTags(newTags);
+                  }}
+
                 />
               </div>
             </div>

@@ -9,7 +9,7 @@ export const TagService = {
     return api.get(path);
   },
   cek: (value = '') => {
-    const path = value ? TAG.cek+"?detail=true&tag="+value : TAG.cek+"/"+value;
+    const path = value ? TAG.cek+"?detail=artikel&artikel="+value : TAG.cek+"/"+value;
     return api.get(path);
   },
   detail: (id) => api.get(`/api/artikel/${id}`),

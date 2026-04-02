@@ -1,6 +1,7 @@
 import { createSignal, For, Show } from "solid-js";
 
 const MAX_TAG = 6;
+
 const listTag = [
   { id: 1, label: "label satu" },
   { id: 2, label: "label dua" },
@@ -14,18 +15,18 @@ const listTag = [
   { id: 10, label: "label sepuluh" },
 ];
 
-const selected = '1,3,5';
-
-const parseSelected = (str) =>
-  str
-    .split(',')
-    .map((id) => listTag.find((t) => t.id === Number(id.trim())))
-    .filter(Boolean);
-
-export default function TagInput() {
-  const [tags, setTags] = createSignal(parseSelected(selected));
+export default function TagInput(props) {
+  // Perbaiki: props.tags sebagai initial value, bukan props.tag()
+  const [tags, setTags] = createSignal(props.tags || []);
   const [input, setInput] = createSignal("");
   const [open, setOpen] = createSignal(false);
+
+  // Perbaiki: fungsi untuk notify parent
+  const notifyParent = (newTags) => {
+    if (props.onTagsChange) {
+      props.onTagsChange(newTags);
+    }
+  };
 
   const isMax = () => tags().length >= MAX_TAG;
 
@@ -38,17 +39,22 @@ export default function TagInput() {
 
   const addTag = (tag) => {
     if (isMax()) return;
-    setTags([...tags(), tag]);
+    const newTags = [...tags(), tag];
+    setTags(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
     setInput("");
     setOpen(false);
   };
 
   const removeTag = (id) => {
-    setTags(tags().filter((t) => t.id !== id));
+    const newTags = tags().filter((t) => t.id !== id);
+    setTags(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
   };
 
   return (
     <div class="relative w-full">
+      {/* Input wrapper */}
       <div
         class={`flex flex-wrap items-center gap-2 rounded-md border p-2 ${
           isMax()
@@ -70,6 +76,7 @@ export default function TagInput() {
             </span>
           )}
         </For>
+
         <input
           value={input()}
           disabled={isMax()}
@@ -78,16 +85,23 @@ export default function TagInput() {
             setOpen(true);
           }}
           onFocus={() => !isMax() && setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
+          onBlur={() => {
+            // Delay close to allow click on dropdown items
+            setTimeout(() => setOpen(false), 200);
+          }}
           placeholder={isMax() ? "Maksimal 6 tag" : "Cari tag..."}
           class="flex-1 min-w-[120px] border-none p-1 text-sm outline-none disabled:cursor-not-allowed disabled:bg-transparent"
         />
       </div>
 
+      {/* Info text */}
       <Show when={isMax()}>
-        <p class="mt-1 text-xs text-red-500">Maksimal {MAX_TAG} tag</p>
+        <p class="mt-1 text-xs text-red-500">
+          Maksimal {MAX_TAG} tag
+        </p>
       </Show>
 
+      {/* Dropdown */}
       <Show when={!isMax() && open() && filteredTags().length > 0}>
         <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
           <For each={filteredTags()}>
@@ -105,6 +119,3 @@ export default function TagInput() {
     </div>
   );
 }
-
-// Pemakaian:
-// <TagInput />

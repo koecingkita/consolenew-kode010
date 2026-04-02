@@ -1,6 +1,7 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show, createEffect, createMemo } from "solid-js";
 
 const MAX_TAG = 6;
+
 const listTag = [
   { id: 1, label: "label satu" },
   { id: 2, label: "label dua" },
@@ -14,18 +15,41 @@ const listTag = [
   { id: 10, label: "label sepuluh" },
 ];
 
-const selected = '1,3,5';
-
-const parseSelected = (str) =>
-  str
-    .split(',')
-    .map((id) => listTag.find((t) => t.id === Number(id.trim())))
-    .filter(Boolean);
-
-export default function TagInput() {
-  const [tags, setTags] = createSignal(parseSelected(selected));
+export default function TagInput(props) {
+  const [tags, setTags] = createSignal([]);
   const [input, setInput] = createSignal("");
   const [open, setOpen] = createSignal(false);
+
+  // Reactive: ambil initialTags dari props
+  const initialTags = createMemo(() => {
+    const raw = props.initialTags?.() || props.tags || [];
+    console.log('initialTags raw:', raw);
+
+    // Konversi ke format yang sesuai
+    if (Array.isArray(raw)) {
+      // Kalau raw berisi string ID, mapping ke object
+      if (raw.length > 0 && typeof raw[0] === 'string') {
+        return raw.map(id => listTag.find(tag => tag.id === parseInt(id))).filter(Boolean);
+      }
+      return raw;
+    }
+    return [];
+  });
+
+  // Update internal tags ketika initialTags berubah
+  createEffect(() => {
+    const newTags = initialTags();
+    console.log('Setting tags from initialTags:', newTags);
+    if (newTags && newTags.length > 0) {
+      setTags(newTags);
+    }
+  });
+
+  const notifyParent = (newTags) => {
+    if (props.onTagsChange) {
+      props.onTagsChange(newTags);
+    }
+  };
 
   const isMax = () => tags().length >= MAX_TAG;
 
@@ -38,14 +62,20 @@ export default function TagInput() {
 
   const addTag = (tag) => {
     if (isMax()) return;
-    setTags([...tags(), tag]);
+    const newTags = [...tags(), tag];
+    setTags(newTags);
+    notifyParent(newTags);
     setInput("");
     setOpen(false);
   };
 
   const removeTag = (id) => {
-    setTags(tags().filter((t) => t.id !== id));
+    const newTags = tags().filter((t) => t.id !== id);
+    setTags(newTags);
+    notifyParent(newTags);
   };
+
+  console.log('Current tags:', tags()); // Debug
 
   return (
     <div class="relative w-full">
@@ -70,6 +100,7 @@ export default function TagInput() {
             </span>
           )}
         </For>
+
         <input
           value={input()}
           disabled={isMax()}
@@ -78,14 +109,18 @@ export default function TagInput() {
             setOpen(true);
           }}
           onFocus={() => !isMax() && setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
+          onBlur={() => {
+            setTimeout(() => setOpen(false), 200);
+          }}
           placeholder={isMax() ? "Maksimal 6 tag" : "Cari tag..."}
           class="flex-1 min-w-[120px] border-none p-1 text-sm outline-none disabled:cursor-not-allowed disabled:bg-transparent"
         />
       </div>
 
       <Show when={isMax()}>
-        <p class="mt-1 text-xs text-red-500">Maksimal {MAX_TAG} tag</p>
+        <p class="mt-1 text-xs text-red-500">
+          Maksimal {MAX_TAG} tag
+        </p>
       </Show>
 
       <Show when={!isMax() && open() && filteredTags().length > 0}>
@@ -105,6 +140,3 @@ export default function TagInput() {
     </div>
   );
 }
-
-// Pemakaian:
-// <TagInput />
