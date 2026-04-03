@@ -1,14 +1,12 @@
 import Container from "./theme/ui/ContainerContent";
 import TextRich from "./TextRich";
+import TagInput from "./TagInput";
 import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, For, Show, createResource } from "solid-js";
 import { ArtikelService } from "./services/artikel.service";
 import { KategoriService } from "./services/kategori.service.js";
-import { TagService } from './services/tag.service';
 
 const GET_KATEGORI = KategoriService.get;
-const GET_TAG_LIST = TagService.get;
-const GET_TAG_ARTIKEL = TagService.cek;
 const UPDATE = ArtikelService.update;
 
 const jenisArtikel = [
@@ -18,7 +16,6 @@ const jenisArtikel = [
 ];
 
 const DEFAULT_CONTENT = { type: "doc", content: [{ type: "paragraph" }] };
-const MAX_TAG = 6;
 
 function parseContentBlocks(raw) {
   if (!raw) return DEFAULT_CONTENT;
@@ -31,100 +28,6 @@ function parseContentBlocks(raw) {
   }
 }
 
-// ─── TagInput (inline) ───────────────────────────────────────────────────────
-function TagInput(props) {
-  const [tags, setTags] = createSignal([]);
-  const [input, setInput] = createSignal("");
-  const [open, setOpen] = createSignal(false);
-  const [initialized, setInitialized] = createSignal(false);
-
-  const notifyParent = (newTags) => props.onTagsChange?.(newTags);
-  const isMax = () => tags().length >= MAX_TAG;
-
-  const filteredTags = () =>
-    (props.tagListDB?.() ?? []).filter(
-      (item) =>
-        item.label.toLowerCase().includes(input().toLowerCase()) &&
-        !tags().some((t) => t.id === item.id)
-    );
-
-  const addTag = (tag) => {
-    if (isMax()) return;
-    const newTags = [...tags(), tag];
-    setTags(newTags);
-    notifyParent(newTags);
-    setInput("");
-    setOpen(false);
-  };
-
-  const removeTag = (id) => {
-    const newTags = tags().filter((t) => t.id !== id);
-    setTags(newTags);
-    notifyParent(newTags);
-  };
-
-  createEffect(() => {
-    const db = props.tagListDB?.() ?? [];
-    const raw = props.dataTag?.();
-    if (initialized() || db.length === 0 || !raw) return;
-    const ids = String(raw).split(',').map((id) => id.trim()).filter(Boolean);
-    const matchTag = ids
-      .map((id) => db.find((tag) => String(tag.id) === String(id)))
-      .filter(Boolean);
-    if (ids.length > 0 && matchTag.length === 0) return;
-    setTags(matchTag);
-    notifyParent(matchTag);
-    setInitialized(true);
-  });
-
-  return (
-    <div class="relative w-full">
-      <div
-        class={`flex flex-wrap items-center gap-2 rounded-md border p-2 ${
-          isMax()
-            ? "border-gray-300 bg-gray-100"
-            : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-500"
-        }`}
-      >
-        <For each={tags()}>
-          {(tag) => (
-            <span class="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
-              {tag.label}
-              <button type="button" onClick={() => removeTag(tag.id)} class="ml-1 hover:text-blue-900">
-                ✕
-              </button>
-            </span>
-          )}
-        </For>
-        <input
-          value={input()}
-          disabled={isMax()}
-          onInput={(e) => { setInput(e.currentTarget.value); setOpen(true); }}
-          onFocus={() => !isMax() && setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder={isMax() ? "Maksimal 6 tag" : "Cari tag..."}
-          class="flex-1 min-w-[120px] border-none p-1 text-sm outline-none disabled:cursor-not-allowed disabled:bg-transparent"
-        />
-      </div>
-      <Show when={isMax()}>
-        <p class="mt-1 text-xs text-red-500">Maksimal {MAX_TAG} tag</p>
-      </Show>
-      <Show when={!isMax() && open()}>
-        <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-          <For each={filteredTags()}>
-            {(item) => (
-              <li onClick={() => addTag(item)} class="cursor-pointer px-3 py-2 text-sm hover:bg-blue-50 transition-colors">
-                {item.label}
-              </li>
-            )}
-          </For>
-        </ul>
-      </Show>
-    </div>
-  );
-}
-
-// ─── UpdateArtikel ────────────────────────────────────────────────────────────
 function UpdateArtikel() {
   const location = useLocation();
   const uuidArtikel = location.pathname.split("/").pop();
@@ -155,24 +58,17 @@ function UpdateArtikel() {
     }
   );
 
-  const [getKategori] = createResource(async () => GET_KATEGORI());
-  const [getTagList] = createResource(async () => GET_TAG_LIST());
-  const [getTagArtikel] = createResource(() => uuidArtikel, async (uuid) => {
-
-    const result = await GET_TAG_ARTIKEL(uuid);
-    console.log('raw tagArtikel response:', uuid);
-    console.log('raw tagArtikel response:', JSON.stringify(result?.data));
+  const [getKategori] = createResource(async () => {
+    const result = await GET_KATEGORI();
     return result;
   });
 
-
   const kategoriList = () => getKategori()?.data?.data ?? [];
-  const tagListDB    = () => getTagList()?.data?.data ?? [];
-  const tagArtikel   = () => getTagArtikel()?.data.data.tagList ?? '';
 
   createEffect(() => {
     const data = artikelData();
     if (!data) return;
+
     setArtikel(data.uuid || 0);
     setKategori(data.kategori || 0);
     setKategoriSub(data.sub || 0);
@@ -197,9 +93,10 @@ function UpdateArtikel() {
       metaSlug: metaSlug(),
       metaDescription: metaDescription(),
       metaKeyword: metaKeyword(),
-      metaTag: tags().map(t => t.id).join(','),
+      tagsList: tags().map(t => t.id).join(','),
       content: [kontenJSON(), kontenHTML()],
     };
+
     try {
       const response = await UPDATE(payload);
       const result = response.data;
@@ -209,11 +106,6 @@ function UpdateArtikel() {
       console.error("Error update artikel:", err.message);
     }
   };
-
-createEffect(() => {
-  console.log('tagListDB:', JSON.stringify(tagListDB()));
-  console.log('tagArtikessssssssssssssssssssssl:', tagArtikel());
-});
 
   return (
     <Container>
@@ -226,9 +118,13 @@ createEffect(() => {
 
       <Show when={artikelData.error}>
         <div class="mx-6 my-10 flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-600">📄</div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-600">
+            📄
+          </div>
           <h2 class="text-lg font-semibold text-gray-700">Artikel tidak ditemukan</h2>
-          <p class="text-sm text-gray-500">Artikel yang kamu cari tidak tersedia atau sudah dihapus.</p>
+          <p class="text-sm text-gray-500">
+            Artikel yang kamu cari tidak tersedia atau sudah dihapus.
+          </p>
           <button
             onClick={() => window.history.back()}
             class="mt-3 rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition"
@@ -244,7 +140,9 @@ createEffect(() => {
           {/* Jenis Artikel */}
           <div class="flex flex-col gap-6 mx-6 mb-5">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="artikeljenis">Jenis Artikel</label>
+              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="artikeljenis">
+                Jenis Artikel
+              </label>
               <select
                 id="artikeljenis"
                 value={kategori()}
@@ -254,7 +152,9 @@ createEffect(() => {
               >
                 <option disabled value={0}>Pilih jenis artikel</option>
                 <For each={jenisArtikel}>
-                  {(item) => <option value={item.id}>{item.label}</option>}
+                  {(item) => (
+                    <option value={item.id}>{item.label}</option>
+                  )}
                 </For>
               </select>
             </div>
@@ -264,7 +164,9 @@ createEffect(() => {
           <Show when={kategori() === 2}>
             <div class="flex flex-col gap-6 mx-6 mb-5">
               <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="kategori_produk">Kategori Produk</label>
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="kategori_produk">
+                  Kategori Produk
+                </label>
                 <Show when={!getKategori.loading} fallback={<p class="text-sm text-gray-400">Memuat Kategori</p>}>
                   <select
                     id="kategori_produk"
@@ -273,7 +175,9 @@ createEffect(() => {
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   >
                     <For each={kategoriList()}>
-                      {(item) => <option value={item.id}>{item.label}</option>}
+                      {(item) => (
+                        <option value={item.id}>{item.label}</option>
+                      )}
                     </For>
                   </select>
                 </Show>
@@ -284,9 +188,14 @@ createEffect(() => {
           {/* Judul */}
           <div class="flex flex-col gap-6 mx-6 mb-5">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="judul">Judul Artikel</label>
+              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="judul">
+                Judul Artikel
+              </label>
               <input
-                type="text" id="judul" value={judul()} onInput={(e) => setJudul(e.target.value)}
+                type="text"
+                id="judul"
+                value={judul()}
+                onInput={(e) => setJudul(e.target.value)}
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 placeholder="Contoh: Top up pulsa murah"
               />
@@ -297,15 +206,25 @@ createEffect(() => {
           {/* Image */}
           <div class="flex flex-col gap-6 mx-6 mb-5">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="image">Image URL</label>
+              <label class="block mb-2.5 text-sm font-medium text-gray-700" for="image">
+                Image URL
+              </label>
               <input
-                type="text" id="image" value={gambar()} onInput={(e) => setGambar(e.target.value)}
+                type="text"
+                id="image"
+                value={gambar()}
+                onInput={(e) => setGambar(e.target.value)}
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 placeholder="https://domain.com/images.webp"
               />
-              <label class="block mb-2.5 mt-5 text-sm font-medium text-gray-700" for="keterangan_image">Keterangan Image</label>
+              <label class="block mb-2.5 mt-5 text-sm font-medium text-gray-700" for="keterangan_image">
+                Keterangan Image
+              </label>
               <input
-                type="text" id="keterangan_image" value={keteranganGambar()} onInput={(e) => setKeteranganGambar(e.target.value)}
+                type="text"
+                id="keterangan_image"
+                value={keteranganGambar()}
+                onInput={(e) => setKeteranganGambar(e.target.value)}
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 placeholder="Gambar adaku - Top up pulsa murah"
               />
@@ -333,7 +252,10 @@ createEffect(() => {
           >
             <TextRich
               initialJSON={kontenJSON()}
-              onChange={(json, html) => { setKontenJSON(json); setKontenHTML(html); }}
+              onChange={(json, html) => {
+                setKontenJSON(json);
+                setKontenHTML(html);
+              }}
               setApi={setEditorApi}
             />
           </Show>
@@ -342,34 +264,63 @@ createEffect(() => {
           <div class="flex flex-col mt-8 rounded-xl w-full max-w-6xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-5 bg-white rounded-xl shadow-sm p-6 border border-gray-200">
               <div>
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_title">Meta Title</label>
-                <input type="text" id="meta_title" value={metaTitle()} onInput={(e) => setMetaTitle(e.target.value)}
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_title">
+                  Meta Title
+                </label>
+                <input
+                  type="text"
+                  id="meta_title"
+                  value={metaTitle()}
+                  onInput={(e) => setMetaTitle(e.target.value)}
                   class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  placeholder="Contoh: Top up pulsa murah" />
+                  placeholder="Contoh: Top up pulsa murah"
+                />
               </div>
               <div>
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_slug">Meta Slug</label>
-                <input type="text" id="meta_slug" value={metaSlug()} onInput={(e) => setMetaSlug(e.target.value)}
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_slug">
+                  Meta Slug
+                </label>
+                <input
+                  type="text"
+                  id="meta_slug"
+                  value={metaSlug()}
+                  onInput={(e) => setMetaSlug(e.target.value)}
                   class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  placeholder="Contoh: top-up-pulsa-murah" />
+                  placeholder="Contoh: top-up-pulsa-murah"
+                />
               </div>
               <div>
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_description">Meta Deskripsi</label>
-                <input type="text" id="meta_description" value={metaDescription()} onInput={(e) => setMetaDescription(e.target.value)}
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_description">
+                  Meta Deskripsi
+                </label>
+                <input
+                  type="text"
+                  id="meta_description"
+                  value={metaDescription()}
+                  onInput={(e) => setMetaDescription(e.target.value)}
                   class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  placeholder="Contoh: Adaku adalah aplikasi digital ..." />
+                  placeholder="Contoh: Adaku adalah aplikasi digital ..."
+                />
               </div>
               <div>
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_keyword">Meta Keyword</label>
-                <input type="text" id="meta_keyword" value={metaKeyword()} onInput={(e) => setMetaKeyword(e.target.value)}
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_keyword">
+                  Meta Keyword
+                </label>
+                <input
+                  type="text"
+                  id="meta_keyword"
+                  value={metaKeyword()}
+                  onInput={(e) => setMetaKeyword(e.target.value)}
                   class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  placeholder="Contoh: Top up Pulsa, Pulsa Murah" />
+                  placeholder="Contoh: Top up Pulsa, Pulsa Murah"
+                />
               </div>
               <div class="lg:col-span-2">
-                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_tag">Meta Tag</label>
+                <label class="block mb-2.5 text-sm font-medium text-gray-700" for="meta_tag">
+                  Meta Tag
+                </label>
                 <TagInput
-                  tagListDB={tagListDB}
-                  dataTag={tagArtikel}
+                  dataTag={() => String(artikelData()?.tags ?? '')}
                   onTagsChange={(newTags) => setTags(newTags)}
                 />
               </div>
@@ -380,12 +331,18 @@ createEffect(() => {
           <div class="w-full max-w-6xl mx-auto mb-20 p-6">
             <div class="flex gap-2 justify-end">
               <div class="flex gap-2 bg-white p-4 rounded-xl shadow-sm">
-                <button type="button" onClick={() => window.history.back()}
-                  class="text-red-600 border border-red-500 shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer hover:bg-gray-50 hover:text-red-400">
+                <button
+                  type="button"
+                  onClick={() => window.history.back()}
+                  class="text-red-600 border border-red-500 shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer hover:bg-gray-50 hover:text-red-400"
+                >
                   Cancel
                 </button>
-                <button type="button" onClick={handleUpdate}
-                  class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer">
+                <button
+                  type="button"
+                  onClick={handleUpdate}
+                  class="text-white bg-blue-500 box-border border border-transparent hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 shadow-xs font-medium leading-5 rounded-xl text-sm px-4 py-2.5 focus:outline-none hover:cursor-pointer"
+                >
                   Update Artikel
                 </button>
               </div>
@@ -399,13 +356,3 @@ createEffect(() => {
 }
 
 export default UpdateArtikel;
-
-
-/*
-
-tag.cek itu response nya data: { tagList : "1,2,4,5" }
-
-mau diconvert ke label dari data tag.get
-
-nanti labelnya di tampilkan di inputan
-*/

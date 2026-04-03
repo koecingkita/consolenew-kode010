@@ -1,24 +1,37 @@
-import { createSignal, For, Show, createEffect } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
 const MAX_TAG = 6;
 
+const listTag = [
+  { id: 1, label: "label satu" },
+  { id: 2, label: "label dua" },
+  { id: 3, label: "label tiga" },
+  { id: 4, label: "label empat" },
+  { id: 5, label: "label lima" },
+  { id: 6, label: "label enam" },
+  { id: 7, label: "label tujuh" },
+  { id: 8, label: "label delapan" },
+  { id: 9, label: "label sembilan" },
+  { id: 10, label: "label sepuluh" },
+];
+
 export default function TagInput(props) {
-  const [tags, setTags] = createSignal([]);
+  // Perbaiki: props.tags sebagai initial value, bukan props.tag()
+  const [tags, setTags] = createSignal(props.tags || []);
   const [input, setInput] = createSignal("");
   const [open, setOpen] = createSignal(false);
-  const [initialized, setInitialized] = createSignal(false);
 
-  // props.tagListDB → () => [{id, label}]
-  // props.dataTag   → () => '1,4,5'
-
+  // Perbaiki: fungsi untuk notify parent
   const notifyParent = (newTags) => {
-    if (props.onTagsChange) props.onTagsChange(newTags);
+    if (props.onTagsChange) {
+      props.onTagsChange(newTags);
+    }
   };
 
   const isMax = () => tags().length >= MAX_TAG;
 
   const filteredTags = () =>
-    (props.tagListDB?.() ?? []).filter(
+    listTag.filter(
       (item) =>
         item.label.toLowerCase().includes(input().toLowerCase()) &&
         !tags().some((t) => t.id === item.id)
@@ -28,7 +41,7 @@ export default function TagInput(props) {
     if (isMax()) return;
     const newTags = [...tags(), tag];
     setTags(newTags);
-    notifyParent(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
     setInput("");
     setOpen(false);
   };
@@ -36,29 +49,12 @@ export default function TagInput(props) {
   const removeTag = (id) => {
     const newTags = tags().filter((t) => t.id !== id);
     setTags(newTags);
-    notifyParent(newTags);
+    notifyParent(newTags); // Panggil dengan data baru
   };
-
-  createEffect(() => {
-    const db = props.tagListDB?.() ?? [];
-    const raw = props.dataTag?.();
-
-    if (initialized() || db.length === 0 || !raw) return;
-
-    const ids = String(raw).split(',').map((id) => id.trim()).filter(Boolean);
-    const matchTag = ids
-      .map((id) => db.find((tag) => String(tag.id) === String(id)))
-      .filter(Boolean);
-
-    if (ids.length > 0 && matchTag.length === 0) return;
-
-    setTags(matchTag);
-    notifyParent(matchTag);
-    setInitialized(true);
-  });
 
   return (
     <div class="relative w-full">
+      {/* Input wrapper */}
       <div
         class={`flex flex-wrap items-center gap-2 rounded-md border p-2 ${
           isMax()
@@ -89,17 +85,24 @@ export default function TagInput(props) {
             setOpen(true);
           }}
           onFocus={() => !isMax() && setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
+          onBlur={() => {
+            // Delay close to allow click on dropdown items
+            setTimeout(() => setOpen(false), 200);
+          }}
           placeholder={isMax() ? "Maksimal 6 tag" : "Cari tag..."}
           class="flex-1 min-w-[120px] border-none p-1 text-sm outline-none disabled:cursor-not-allowed disabled:bg-transparent"
         />
       </div>
 
+      {/* Info text */}
       <Show when={isMax()}>
-        <p class="mt-1 text-xs text-red-500">Maksimal {MAX_TAG} tag</p>
+        <p class="mt-1 text-xs text-red-500">
+          Maksimal {MAX_TAG} tag
+        </p>
       </Show>
 
-      <Show when={!isMax() && open()}>
+      {/* Dropdown */}
+      <Show when={!isMax() && open() && filteredTags().length > 0}>
         <ul class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
           <For each={filteredTags()}>
             {(item) => (
