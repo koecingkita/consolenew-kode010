@@ -7,19 +7,22 @@ import { FaRegularEdit } from "solid-icons/fa";
 import { RiSystemDeleteBinLine } from "solid-icons/ri";
 import { KategoriService } from "./services/kategori.service";
 import Delete from "./modals/Delete.jsx";
-
+import { AiOutlineSearch } from "solid-icons/ai";
+import { BiRegularFilterAlt } from "solid-icons/bi";
+import { BsSortDownAlt } from "solid-icons/bs";
 
 const initialModals = { type: null, item: null, open: false };
 
 function Kategori() {
   const [modals, setModals] = createSignal(initialModals);
+  const [search, setSearch] = createSignal("");
+  const [sortDir, setSortDir] = createSignal("asc");
 
   // 🔥 ambil refetch dengan benar
   const [kategori, { refetch }] = createResource(async () => {
     const result = await KategoriService.get();
     return result.data.data; // langsung return array
   });
-
 
 
   createEffect(() => {
@@ -35,6 +38,24 @@ function Kategori() {
   const closeModal = () => {
     setModals(initialModals);
   };
+
+  const filterBySearch = (list) => {
+    if(!Array.isArray(list)) return [];
+    const q = search().toLowerCase().trim();
+
+    let result = [...list];
+    if(q) {
+      result = result.filter(item =>
+        item.label?.toLowerCase().includes(q)
+      )
+    }
+
+    result = result.sort((a, b) => {
+      return sortDir() === "asc" ? a.id - b.id : b.id - a.id
+    })
+
+    return result;
+  }
 
   const headKategori = [
     {
@@ -88,6 +109,32 @@ function Kategori() {
             Buat Kategori
           </button>
         </div>
+
+      <div class='flex flex-row gap-4 mt-8 justify-between'>
+        <div>
+          <div class='relative'>
+            <input
+              type="text"
+              value={search()}
+              placeholder='Cari kategori ...'
+              onInput={(e) => setSearch(e.currentTarget.value)}
+              class='w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white' />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400">
+              <AiOutlineSearch />
+            </span>
+          </div>
+        </div>
+
+        <div class='flex flex-wrap items-center gap-2'>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BiRegularFilterAlt />
+Filter</button>
+          <button class='hover:cursor-pointer flex items-center gap-1 rounded-lg  bg-white px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition'>
+            <BsSortDownAlt />
+Sort</button>
+        </div>
+      </div>
+
       </div>
 
       {/* TABLE */}
@@ -114,7 +161,7 @@ function Kategori() {
 
             <tbody class="divide-y divide-gray-200">
               <Show
-                when={kategori()}
+                when={filterBySearch(kategori())}
                 fallback={
                   <tr>
                     <td

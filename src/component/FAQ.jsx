@@ -16,6 +16,8 @@ const initialModals = { type:null, item:null, open:false }
 
 function FAQ() {
   const [modals, setModals] = createSignal(initialModals);
+  const [search, setSearch] = createSignal("");
+  const [sortDir, setSortDir] = createSignal("asc");
 
   const [faq, { refetch }] = createResource(async () => {
     const result = await FAQService.get();
@@ -23,8 +25,8 @@ function FAQ() {
   })
 
   createEffect(() => {
-    if (tag()) {
-      console.log("tag: ", tag());
+    if (faq()) {
+      console.log("faq: ", faq());
     }
   })
 
@@ -36,6 +38,24 @@ function FAQ() {
     setModals(initialModals)
   }
 
+  const filterBySearch = (list) => {
+    if(!Array.isArray(list)) return [];
+    const q = search().toLocaleLowerCase().trim();
+
+    let result = [...list];
+
+    if(q){
+      result = result.filter(item =>
+        item.question?.toLocaleLowerCase().includes(q)
+      )
+    }
+
+    result = result.sort((a, b) => {
+      return sortDir() === "asc" ? a.id - b.id : b.id - a.id
+    });
+
+    return result;
+  }
 
   const recentOrders = [
     { id: '#ORD-001', customer: 'John Smith', date: 'Today, 10:30 AM', amount: '$245.99', status: 'Completed' },
@@ -82,7 +102,7 @@ return (<>
         </div>
 
         <div>
-          <button onCLick={() => openModal('create') } class="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
+          <button onClick={() => openModal('create') } class="hover:cursor-pointer flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
             <FaSolidAdd class="h-4 w-4" />
             Buat FAQ
           </button>
@@ -92,7 +112,11 @@ return (<>
       <div class='flex flex-row gap-4 mt-8 justify-between'>
         <div>
           <div class='relative'>
-            <input placeholder='Cari kategori ...' class='w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white' />
+            <input
+              type="text"
+              value={search()}
+              onInput={(e) => setSearch(e.currentTarget.value)}
+              placeholder='Cari kategori ...' class='w-60 rounded-lg bg-white/90 border px-4 py-1 text-sm  text-gray-800  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white' />
             <span class="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400">
               <AiOutlineSearch />
             </span>
@@ -124,7 +148,7 @@ return (<>
             </For>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <For each={faq()}>
+            <For each={filterBySearch(faq())}>
               {(item) => (
                 <tr class="hover:bg-gray-50 transition-colors">
                   <For each={headFAQ}>
