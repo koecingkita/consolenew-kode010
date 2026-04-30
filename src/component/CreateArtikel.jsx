@@ -7,9 +7,12 @@ import { ArtikelService } from "./services/artikel.service.js";
 import { KategoriService } from "./services/kategori.service.js";
 import { useAuth } from "./context/AuthContext";
 import { TagService } from './services/tag.service';
+import { BsTag } from "solid-icons/bs";
+
 
 const CREATE_ARTIKEL = ArtikelService.create;
 const GET_KATEGORI = KategoriService.get;
+const GET_TAG_ARTIKEL = TagService.get;
 
 const jenisArtikel = [
   { id: 1, label: 'Artikel' },
@@ -40,13 +43,14 @@ function CreateArtikel(props) {
   const [contentHTML, setContentHTML] = createSignal("");
   const [tagData, setTagData] = createSignal("");
 
-  const [tag, { refetch }] = createResource(async () => {
-    const result = await TagService.get();
-    return result.data.data;
-  })
+  // const [tag, { refetch }] = createResource(async () => {
+  //   const result = await GET_TAG_ARTIKEL.get();
+  //   return result.data.data;
+  // })
 
-  console.log("taggini mah: ", tag());
-  console.log("taggini mahgggggggggggggggggggggggggggggggggg: ", tagData());
+  const [getTagList] = createResource(async () => GET_TAG_ARTIKEL());
+
+  const tagListDB = () => getTagList()?.data?.data ?? [];
 
   // Resource untuk kategori
   const [kategori] = createResource(async () => {
@@ -63,18 +67,16 @@ function CreateArtikel(props) {
     console.log("Kategori loading:", kategori.loading);
     console.log("Kategori data:", kategori());
     console.log("Kategori latest:", kategori.latest);
-    console.log("tag latest: ggggggggggggggggggggggggggggggggggggggggggzzzzzzzzzzzzzzs", tagData());
+    console.log("ZZZZZZZZZZ: ", tagListDB());
   });
 
   const handleSave = () => {
     console.log("SAVE");
 
-
-
     const tmpData = {
       ...artikel(),
       content: { ...artikel().initialBody, value: contentJSON() },
-      tagList
+      tagList: tagListDB()
     };
 
     const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
@@ -349,3 +351,9 @@ function CreateArtikel(props) {
 }
 
 export default CreateArtikel;
+
+/*
+  ada masalah di "tagListDB"
+
+  kalo liat dari console.log ZZZZZZZZZZ itu datanya ada, tapi ada masalah di field text input dan setDataTag nya
+*/

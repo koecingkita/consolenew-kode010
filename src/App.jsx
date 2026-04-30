@@ -23,9 +23,10 @@ const NotFound = lazy(() => import("./pages/notfound"));
 
 const App = () => {
   const isAuthenticated = 'admin';
-  const { role } = useAuth();
+  const { role, author } = useAuth();
 
   console.log("liat status: ", role);
+  console.log("liat author: ", author);
 
   const routesPublic = [
     { path: '/', component: Login},
