@@ -42,6 +42,7 @@ function CreateArtikel(props) {
   const [contentJSON, setContentJSON] = createSignal(null);
   const [contentHTML, setContentHTML] = createSignal("");
   const [tagData, setTagData] = createSignal("");
+  const [selectedTags, setSelectedTags] = createSignal([]);
 
   // const [tag, { refetch }] = createResource(async () => {
   //   const result = await GET_TAG_ARTIKEL.get();
@@ -51,6 +52,10 @@ function CreateArtikel(props) {
   const [getTagList] = createResource(async () => GET_TAG_ARTIKEL());
 
   const tagListDB = () => getTagList()?.data?.data ?? [];
+  const getSelectedTagIds = () => {
+    return selectedTags().map(tag => tag.id).join(',');
+  };
+
 
   // Resource untuk kategori
   const [kategori] = createResource(async () => {
@@ -63,11 +68,15 @@ function CreateArtikel(props) {
   const location = useLocation();
 
   createEffect(() => {
-    console.log("query:", location.pathname);
-    console.log("Kategori loading:", kategori.loading);
-    console.log("Kategori data:", kategori());
-    console.log("Kategori latest:", kategori.latest);
-    console.log("ZZZZZZZZZZ: ", tagListDB());
+    // console.log("query:", location.pathname);
+    // console.log("Kategori loading:", kategori.loading);
+    // console.log("Kategori data:", kategori());
+    // console.log("Kategori latest:", kategori.latest);
+    // console.log("ZZZZZZZZZZ: ", tagListDB());
+
+    const tagIds = getSelectedTagIds();
+    console.log('Selected tag IDs string:', tagIds);
+
   });
 
   const handleSave = () => {
@@ -95,38 +104,37 @@ function CreateArtikel(props) {
     return;
   };
 
-  const handlePublish = () => {
-    console.log("PUBLISH");
+const handlePublish = () => {
+  console.log("PUBLISH");
 
-    const tmpData = {
-      ...artikel(),
-      content: { ...artikel().initialBody, value: [contentJSON(), contentHTML()] },
-      tagList: tagData()
-    };
+  // ✅ Gunakan selectedTags, bukan tagData
+  const tagListString = selectedTags().map(item => item.id).join(',');
+  console.log("Tag IDs untuk DB:", tagListString);
 
-
-    const tagList = tagData().map(item => item.id).join(',');
-    console.log("tag latest: list :::: ", tagList);
-
-    const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
-
-    const dataObject = {
-      ...Object.fromEntries(
-        metaArray.map(item => [item.label, item.value])
-      ),
-      content: tmpData.content?.value,
-      kategori: jenisArtikelProduk() ? jenisArtikelProduk() : jenisArtikelId(),
-      ...(jenisArtikelProduk() ? {parent : jenisArtikelId()} : {}),
-      author,
-      metaTag: tagList
-    };
-
-    CREATE_ARTIKEL(dataObject);
-
-    console.log('temporary Data: ', tmpData);
-    console.log('contentt: ', tmpData.content.value);
-    return;
+  const tmpData = {
+    ...artikel(),
+    content: { ...artikel().initialBody, value: [contentJSON(), contentHTML()] }
   };
+
+  const metaArray = Array.isArray(tmpData.meta) ? tmpData.meta : [];
+
+  const dataObject = {
+    ...Object.fromEntries(
+      metaArray.map(item => [item.label, item.value])
+    ),
+    content: tmpData.content?.value,
+    kategori: jenisArtikelProduk() ? jenisArtikelProduk() : jenisArtikelId(),
+    ...(jenisArtikelProduk() ? {parent : jenisArtikelId()} : {}),
+    author,
+    metaTag: tagListString  // ✅ Pakai tagListString
+  };
+
+  CREATE_ARTIKEL(dataObject);
+
+  console.log('temporary Data: ', tmpData);
+  console.log('contentt: ', tmpData.content.value);
+  return;
+};
 
   const updateMetaByLabel = (label, value) => {
     setArtikel({
@@ -260,6 +268,16 @@ function CreateArtikel(props) {
         </div>
       </div>
 
+{/* start */}
+{/*
+  {tagListDB().map((item, index) => (
+    <div>
+      {item.label}
+    </div>
+  ))}
+*/}
+{/* end*/}
+
       {/* TextRich Editor */}
       <TextRich
         initialJSON={contentJSON()}
@@ -325,7 +343,21 @@ function CreateArtikel(props) {
             <label class="block mb-2.5 text-sm font-medium text-heading" for="file_input">
               Meta Tag
             </label>
-            <TagInput tag={tag()} onTagsChange={setTagData} /> {/* kirim tag() ke component ini terus disimpan di tagData()*/}
+            <TagInput
+                listTag={tagListDB}
+                tags={selectedTags}
+                setTags={setSelectedTags}
+                onTagChange={(tagIdsString) => {
+                console.log('Tag berubah:', tagIdsString);
+              }}
+            />
+
+            <p class="mt-1 text-xs text-gray-500">
+              Tag terpilih: {selectedTags().map(t => t.label).join(', ')}
+            </p>
+            <p class="text-xs text-gray-400">
+              ID Tag: {selectedTags().map(t => t.id).join(', ')}
+            </p>
           </div>
         </div>
       </div>
