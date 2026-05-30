@@ -106,7 +106,11 @@ function CreateArtikel(props) {
 
 const handlePublish = () => {
   console.log("PUBLISH");
+  const html = contentHTML();  // ✅ definisikan dulu
+  const json = contentJSON();
 
+  console.log('HTML type:', typeof html);
+  console.log('HTML value:', html);
   // ✅ Gunakan selectedTags, bukan tagData
   const tagListString = selectedTags().map(item => item.id).join(',');
   console.log("Tag IDs untuk DB:", tagListString);
