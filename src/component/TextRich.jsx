@@ -109,7 +109,8 @@ export default function TextRich(props) {
 
   const emitChange = () => {
     if (!editorInstance) return;
-    props?.onChange?.(editorInstance.getJSON(), editorInstance.getHTML());
+    const html = editorInstance.getHTML().replace(/<p><\/p>/g, '<p>&nbsp;</p>');
+    props?.onChange?.(editorInstance.getJSON(), html);
   };
 
   const initEditor = () => {
@@ -560,3 +561,11 @@ export default function TextRich(props) {
     </div>
   );
 }
+
+
+/*
+setiap di render html itu gini:
+"\"<p>artikel satu <span style=\\\"color: rgb(207, 32, 102);\\\">satu satu satu </span>dua artikel satu satu satu satu dua artikel satu satu satu satu dua artikel satu satu satu satu dua <span style=\\\"color: rgb(0, 255, 110);\\\">artikel satu satu satu satu d</span>ua artikel satu satu satu satu dua artikel satu satu satu satu dua artikel satu satu satu satu dua</p>\""
+
+jadi ketika coba di editor : https://www.w3schools.com/html/tryit.asp?filename=tryhtml_editor itu htmlnya gagal di tampilin stylenya
+*/
