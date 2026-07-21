@@ -11,6 +11,8 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import Blockquote from "@tiptap/extension-blockquote";
 import Link from "@tiptap/extension-link";
 import { FaRegularImage } from "solid-icons/fa";
+import ListItem from "@tiptap/extension-list-item";
+
 
 /* ================= IMAGE BLOCK ================= */
 const ImageBlock = Node.create({
@@ -70,13 +72,26 @@ const FontSize = TextStyle.extend({
 /* ================= LIST EXTENSIONS ================= */
 const BulletListTW = BulletList.extend({
   renderHTML({ HTMLAttributes }) {
-    return ["ul", mergeAttributes(HTMLAttributes, { class: "list-disc pl-6" }), 0];
+    return [
+      "ul",
+      mergeAttributes(HTMLAttributes, {
+        style: "list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0;",
+      }),
+      0,
+    ];
   },
 });
 
+
 const OrderedListTW = OrderedList.extend({
   renderHTML({ HTMLAttributes }) {
-    return ["ol", mergeAttributes(HTMLAttributes, { class: "list-decimal pl-6" }), 0];
+    return [
+      "ol",
+      mergeAttributes(HTMLAttributes, {
+        style: "list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0;",
+      }),
+      0,
+    ];
   },
 });
 
@@ -91,6 +106,20 @@ const BlockquoteTW = Blockquote.extend({
     ];
   },
 });
+
+
+const ListItemTW = ListItem.extend({
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "li",
+      mergeAttributes(HTMLAttributes, {
+        style: "display: list-item;",
+      }),
+      0,
+    ];
+  },
+});
+
 
 /* ================= MAIN EDITOR COMPONENT ================= */
 export default function TextRich(props) {
@@ -133,9 +162,11 @@ export default function TextRich(props) {
           bulletList: false,
           orderedList: false,
           blockquote: false,
+          listItem: false,
         }),
         BulletListTW,
         OrderedListTW,
+        ListItemTW,
         BlockquoteTW,
         Underline,
         TextStyle,

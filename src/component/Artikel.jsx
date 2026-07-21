@@ -252,10 +252,12 @@ function Artikel() {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <button class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 hover:cursor-pointer transition">
-              <FaSolidDownload class="h-4 w-4" />
-              Download CSV
-            </button>
+              {/*
+                <button class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 hover:cursor-pointer transition">
+                  <FaSolidDownload class="h-4 w-4" />
+                  Download CSV
+                </button>
+              */}
             <A href='create' class="flex items-center gap-2 rounded-lg bg-white px-4 py-1 border border-slate-950 text-xs font-semibold text-gray-700 hover:bg-gray-300 transition">
               <FaSolidAdd class="h-4 w-4" />
               Buat Artikel

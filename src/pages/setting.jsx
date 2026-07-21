@@ -3,7 +3,7 @@ import Container from "../component/theme/ui/ContainerContent"
 
 function Setting() {
   return <Container>
-    <SettingContent />
+    {/* <SettingContent />*/}
   </Container>
 }
 

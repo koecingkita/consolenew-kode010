@@ -3,7 +3,7 @@ import Container from "../component/theme/ui/ContainerContent"
 
 function Dashboard() {
   return <Container>
-      <DashboardContent />
+      {/* <DashboardContent />*/}
   </Container>
 }
 
